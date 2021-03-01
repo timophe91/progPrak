@@ -1,7 +1,10 @@
 import Type
 
-class Pretty p where 
-    pretty :: a -> String
-    pretty :: Term -> String
-    pretty Var (VarName a) = a
-    pretty Comb (CombName [t:ts]) = pretty t  ++ pretty (Comb (CombName ts))
+pretty :: Term -> String 
+pretty (Var (VarName v)) = v
+pretty (Comb "." [t1,t2]) = 
+pretty (Comb c []) = c
+pretty (Comb c t) = c ++ "(" ++ coma (map pretty t) ++ ")"
+  where coma:: [String] -> String
+        coma [x]    = x
+        coma (x:xs) = (x ++ ", ") ++ coma xs
