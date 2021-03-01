@@ -13,8 +13,13 @@ pretty (Comb c t) = c ++ "(" ++ coma (map pretty t) ++ ")"
 prettyCombination :: Term -> Term -> String
 prettyCombination (Var (VarName v1)) (Var (VarName v2))  = v1 ++ ", " ++ v2
 prettyCombination (Var (VarName v))  (Comb "." [t1, t2]) = v ++ ", " ++ prettyCombination t1 t2
-prettyCombination (Var (VarName v))  c                   = v ++ "|" ++ pretty c
-prettyCombination t1                 t2                  = pretty t2 ++ pretty t2
+prettyCombination (Var (VarName v))  (Comb [] [])        = v
+prettyCombination (Var (VarName v))  t                   = v ++ "|" ++ pretty t
+prettyCombination t                  (Var (VarName v))   = pretty t ++ "|" ++ v
+prettyCombination (Comb c [])        (Comb "[]" [])      = c
+prettyCombination (Comb c [])        (Comb "." [t1, t2]) = c ++ ", " ++ prettyCombination t1 t2
+prettyCombination t                  (Comb "[]" [])      = pretty t
+prettyCombination t1                 t2                  = pretty t1 ++ "|" ++ pretty t2
 
 
 
