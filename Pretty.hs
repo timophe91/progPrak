@@ -29,11 +29,6 @@ instance Pretty Term where
  - in their different ways
 -}
 prettyLists :: Term -> Term -> String
-prettyLists (Var (VarName v1)) (Var (VarName v2))  = v1 ++ ", " ++ v2
-prettyLists (Var (VarName v))  (Comb "." [t1, t2]) = v ++ ", " ++ prettyLists t1 t2
-prettyLists (Var (VarName v))  (Comb [] [])        = v
-prettyLists (Var (VarName v))  t                   = v ++ "|" ++ pretty t
-prettyLists t                  (Var (VarName v))   = pretty t ++ "|" ++ v
 prettyLists (Comb c [])        (Comb "[]" [])      = c
 prettyLists (Comb c [])        (Comb "." [t1, t2]) = c ++ ", " ++ prettyLists t1 t2
 prettyLists t                  (Comb "[]" [])      = pretty t
