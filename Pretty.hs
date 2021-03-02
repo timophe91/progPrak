@@ -1,3 +1,7 @@
+module Pretty
+  (pretty)
+  where
+
 import Type
 
 {- A Class for a pretty output of datatypes
