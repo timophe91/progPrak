@@ -21,8 +21,6 @@ instance Vars Goal where
     allVars (Goal t) = concatMap allVars t
 
 
-
-
 {- Generating a endless list of VarNames with the form:
  - [VarName "A", ... ,VarName "Z", VarName "A0", ... ,VarName "Z0", VarName "A1", ... , VarName "Z1", ... ]
 -}
