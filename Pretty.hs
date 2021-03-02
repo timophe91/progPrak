@@ -1,25 +1,39 @@
 import Type
 
-pretty :: Term -> String 
-pretty (Var (VarName v)) = v
-pretty (Comb "." [t1,t2]) = "[" ++ prettyCombination t1 t2 ++ "]"
-pretty (Comb c []) = c
-pretty (Comb c t) = c ++ "(" ++ coma (map pretty t) ++ ")"
-  where coma:: [String] -> String
-        coma [x]    = x
-        coma (x:xs) = (x ++ ", ") ++ coma xs
+{- A Class for a pretty output of datatypes
+-}
+class Show a => Pretty a where
+  pretty ::  a -> String
+  pretty a = "\"" ++ show a ++ "\"\n"
 
 
-prettyCombination :: Term -> Term -> String
-prettyCombination (Var (VarName v1)) (Var (VarName v2))  = v1 ++ ", " ++ v2
-prettyCombination (Var (VarName v))  (Comb "." [t1, t2]) = v ++ ", " ++ prettyCombination t1 t2
-prettyCombination (Var (VarName v))  (Comb [] [])        = v
-prettyCombination (Var (VarName v))  t                   = v ++ "|" ++ pretty t
-prettyCombination t                  (Var (VarName v))   = pretty t ++ "|" ++ v
-prettyCombination (Comb c [])        (Comb "[]" [])      = c
-prettyCombination (Comb c [])        (Comb "." [t1, t2]) = c ++ ", " ++ prettyCombination t1 t2
-prettyCombination t                  (Comb "[]" [])      = pretty t
-prettyCombination t1                 t2                  = pretty t1 ++ "|" ++ pretty t2
+{- Pretty output Simple Prolog Terms
+ - Using the Type.hs
+ - pretty :: Term -> String
+-}
+instance Pretty Term where 
+  pretty (Var (VarName v)) = v
+  pretty (Comb "." [t1,t2]) = "[" ++ prettyLists t1 t2 ++ "]"
+  pretty (Comb c []) = c
+  pretty (Comb c t) = c ++ "(" ++ comma (map pretty t) ++ ")"
+    where comma:: [String] -> String -- setting a comma between all elements and concat them to one string
+          comma [x]    = x
+          comma (x:xs) = (x ++ ", ") ++ comma xs
+
+
+{- A function to pretty Prolog Lists
+ - in their different ways
+-}
+prettyLists :: Term -> Term -> String
+prettyLists (Var (VarName v1)) (Var (VarName v2))  = v1 ++ ", " ++ v2
+prettyLists (Var (VarName v))  (Comb "." [t1, t2]) = v ++ ", " ++ prettyLists t1 t2
+prettyLists (Var (VarName v))  (Comb [] [])        = v
+prettyLists (Var (VarName v))  t                   = v ++ "|" ++ pretty t
+prettyLists t                  (Var (VarName v))   = pretty t ++ "|" ++ v
+prettyLists (Comb c [])        (Comb "[]" [])      = c
+prettyLists (Comb c [])        (Comb "." [t1, t2]) = c ++ ", " ++ prettyLists t1 t2
+prettyLists t                  (Comb "[]" [])      = pretty t
+prettyLists t1                 t2                  = pretty t1 ++ "|" ++ pretty t2
 
 
 
@@ -34,7 +48,7 @@ prettyCombination t1                 t2                  = pretty t1 ++ "|" ++ p
 
 
 
-----------------------------------------------------
+---------------------------------------------------- 
 test:: IO()
 test = do putStrLn "Var (VarName \"A\")"
           putStrLn (pretty (Var (VarName "A")))
