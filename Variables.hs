@@ -1,7 +1,6 @@
 module Variables where
 
 import Type
-import Substitution
 
 class Vars v where
     allVars :: v -> [VarName]
@@ -19,11 +18,6 @@ instance Vars Prog where
 
 instance Vars Goal where
     allVars (Goal t) = removeDups (concatMap allVars t)
-
-instance Vars Subst where
-    allVars Empty    = []
-    allVars (Subs v) = removeDups (concatMap (\(v, t) -> v : allVars t) v)
-
 
 {- Generating a endless list of VarNames with the form:
  - [VarName "A", ... ,VarName "Z", VarName "A0", ... ,VarName "Z0", VarName "A1", ... , VarName "Z1", ... ]

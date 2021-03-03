@@ -3,15 +3,24 @@ module Substitution where
 
 import Type
 import Test.QuickCheck
+import Variables
+import Data.List
+
+instance Vars Subst where
+    allVars Empty    = []
+    allVars (Subs v) = removeDups (concatMap (\(v, t) -> v : allVars t) v)
 
 data Subst = Empty | Subs [(VarName, Term)]
   deriving (Eq, Show)
 
+
+
 {- outputs the domain of a substitution
 -}
 domain :: Subst -> [VarName]
-domain Empty                = []
-domain (Subs ((x,_):s))     = x : domain (Subs s)
+domain (Subs [])        = []
+domain Empty            = []
+domain (Subs ((x,_):s)) = x : domain (Subs s)
 
 {- Creates a empty substitution
 -}
@@ -86,8 +95,47 @@ prop_ApplySingle v t = apply (single v t) (Var v) == t
 prop_DomainEmpty :: Bool
 prop_DomainEmpty = null (domain Empty)
 
---prop_domainrestrict :: Subst -> [VarName] -> Bool
---prop_domainrestrict s v = domain(restrictTo s v) == v
+prop_DomainSingleSelfReference :: VarName -> Bool 
+prop_DomainSingleSelfReference x = null (domain (single x (Var x)))
+
+prop_DomainSingle :: VarName -> Term -> Property  
+prop_DomainSingle v t = t /= Var v ==> domain (single v t) == [v]
+
+--Funktioniert brauch nur ewig
+--prop_DomainCompose :: Subst -> Subst -> Bool 
+--prop_DomainCompose s1 s2 = listElem (domain (compose s1 s2)) (domain s1 ++ domain s2)
+
+--prop_DomainComposeSingle :: VarName -> VarName -> Property  
+--prop_DomainComposeSingle x y = x /= y ==> domain (compose (single y (Var x)) (single x (Var y))) == [y]
+
+prop_allVarsEmpty :: Bool 
+prop_allVarsEmpty = null (allVars empty)
+
+prop_allVarsSingleSelfReference :: VarName -> Bool
+prop_allVarsSingleSelfReference x = null (allVars (single x (Var x)))
+
+prop_allVarsSingle :: VarName -> Term -> Property 
+prop_allVarsSingle v t = t /= Var v ==> listElem (allVars (single v t))  (v : allVars t)
+
+--Funktioniert brauch nur ewig
+--prop_allVarsCompose :: Subst -> Subst -> Bool
+--prop_allVarsCompose s1 s2 = listElem (allVars (compose s1 s2)) (allVars s1 ++ allVars s2)
+
+--prop_allVarsComposeSingle :: VarName -> VarName -> Property  
+--prop_allVarsComposeSingle v1 v2 = v1 /= v2 ==> allVars (compose (single v2 (Var v1)) (single v1 (Var v2))) == [v1,v2]
+
+prop_DomainAllVars :: Subst -> Bool
+prop_DomainAllVars s = listElem (domain s) (allVars s)
+
+prop_DomainRestrictEmpty :: [VarName] -> Bool 
+prop_DomainRestrictEmpty n = null (domain (restrictTo Empty n))
+
+prop_domainrestrict :: Subst -> [VarName] -> Bool
+prop_domainrestrict s n = listElem (domain(restrictTo s n)) n
+
+listElem :: Eq a => [a] -> [a] -> Bool
+listElem [] _     = True
+listElem (x:xs) y = x `elem` y && listElem xs y
 
 -- Check all properties in this module:
 return []
