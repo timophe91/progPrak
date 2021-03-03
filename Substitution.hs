@@ -18,9 +18,11 @@ empty :: Subst
 empty = []
 
 {- Creates a substitution that maps a single variable to a term
+ - substitutions on self r empty
 -}
 single :: VarName -> Term -> Subst
-single v t = [(v, t)]
+single v (Var v2) = if v == v2 then empty else [(v, Var v2)]
+single v t        = [(v, t)]
 
 {- Applys a substitution to a given term
 -}
