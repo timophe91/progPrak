@@ -28,7 +28,7 @@ instance Pretty Term where
 -}
 instance Pretty Subst where
   pretty Empty = "{}" 
-  pretty (Subs s)  = "{" ++ comma (map (\(v, t) -> show v ++ " -> " ++ pretty t) s) ++ "}"
+  pretty (Subs s)  = "{" ++ comma (map (\(VarName v, t) -> v ++ " -> " ++ pretty t) s) ++ "}"
 
 
 {- A function to pretty Prolog Lists
