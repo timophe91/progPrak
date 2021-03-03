@@ -45,27 +45,32 @@ apply s             (Comb n t)    = Comb n [apply s x| x <- t]
 {- Merge two Prolog Substitutions
 -}
 compose :: Subst -> Subst -> Subst
-compose s1    Empty             = s1
-compose Empty s2                = s2
-compose (Subs [])     s2        = Empty
-compose s1    (Subs [])         = Empty
-compose (Subs (su:sus)) s2 = concatSubs (composeHelp (Subs [su]) s2) (compose (Subs sus) s2)
-  where
-    composeHelp :: Subst -> Subst -> Subst
-    composeHelp (Subs [(v, t)]) (Subs ((v2, t2):ys))
-     | v == v2     = concatSubs (compose (Subs [(v, t)]) (Subs ys)) (single v2 (apply (Subs [(v, t)]) t2)) -- if two VarName r the same: A -> B, A -> C
-     | t == Var v2 = concatSubs (compose (Subs [(v, t)]) (Subs ys)) (single v  t2) -- if u have A -> B , B -> C
-     | otherwise   = concatSubs (concatSubs (single v t) (single v2 (apply (Subs [(v, t)]) t2))) (compose (Subs [(v, t)]) (Subs ys)) -- every other case
+compose s1              Empty     = s1
+compose Empty           s2        = s2
+compose (Subs [])       s2        = s2
+compose s1              (Subs []) = s1
+compose (Subs ((v0, t0):subs0))  (Subs ((v1, t1):subs1)) 
+  | (v0 == v1) || (Var v1 `partOfSubs` subs0)     = concatSubs (single v1 t1) (compose (Subs subs0) (Subs subs1)) -- {A-> B} ° {A -> C} => {A -> C}
+  | (v0 /= v1) || not (Var v1 `partOfSubs` subs0) = concatSubs (single v1 (apply (Subs ((v0, t0):subs0)) t1)) (compose (Subs ((v0, t0):subs0)) (Subs subs1)) -- (v1, t1) NICHT in s1 enthalten
+  | (v0 /= v1) || not (Var v0 `partOfSubs` subs1) = concatSubs (single v0 (apply (Subs ((v1, t1):subs1)) t0)) (compose (Subs subs0) (Subs ((v1, t1):subs1))) -- (v0, t0) NICHT in s2
+  | Var v1 == t0                              = concatSubs (single v0 t1) (compose (Subs subs0) (Subs subs1)) -- {A-> B} ° {B -> C} => {A -> C}
+  | t0 `partOfSubs` subs1                     = concatSubs (single v0 (apply (Subs ((v0, t0):subs0)) (firstAppearance t0 subs1))) (compose (Subs subs0) (Subs ((v1, t1):subs1)))
+  | otherwise                                 = compose (Subs subs0) (Subs subs1)
+
+firstAppearance :: Term -> [(VarName, Term)] -> Term
+firstAppearance t ((v, t1):r) = if t == Var v then t1 else firstAppearance t r
+
+
+partOfSubs :: Term -> [(VarName, Term)] -> Bool
+partOfSubs _ []          = False 
+partOfSubs v ((vs, _):r) = (v == (Var vs)) || partOfSubs v r
 
 {- Concatenate two Subst and removing duplicates
 -}
 concatSubs :: Subst -> Subst -> Subst
 concatSubs Empty    x           = x
 concatSubs x        Empty       = x
-concatSubs (Subs x) (Subs y)    = Subs (removeDups (x ++ y))
-  where 
-    removeDups []     = []
-    removeDups (x:xs) = if x `elem` xs then removeDups xs else x : removeDups xs
+concatSubs (Subs x) (Subs y)    = Subs (x ++ y)
 
 
 {- Restricts the domain of a substitution to a given set of variables
@@ -81,7 +86,7 @@ instance Arbitrary Subst where
   arbitrary = do
     x <- arbitrary
     y <- arbitrary
-    oneof [return Empty, return (Subs [(v,t)| v <- x, t <- y])]
+    oneof [return Empty, return (Subs (nub [(v,t)| v <- nub x, t <- y]))]
 
 prop_ApplyEmpty :: Term -> Bool
 prop_ApplyEmpty t = t == apply Empty t
@@ -90,7 +95,7 @@ prop_ApplySingle :: VarName -> Term -> Bool
 prop_ApplySingle v t = apply (single v t) (Var v) == t
 
 prop_ApplyCompose :: Subst -> Subst -> Term -> Bool 
-prop_ApplyCompose s1 s2 t = apply (compose s1 s2) t == apply s1 (apply s2 t)
+prop_ApplyCompose s1 s2 t = termEquals (apply (compose s1 s2) t)  (apply s1 (apply s2 t))
 
 prop_DomainEmpty :: Bool
 prop_DomainEmpty = null (domain Empty)
@@ -122,7 +127,7 @@ prop_allVarsSingle v t = t /= Var v ==> listElem (allVars (single v t))  (v : al
 --prop_allVarsCompose s1 s2 = listElem (allVars (compose s1 s2)) (allVars s1 ++ allVars s2)
 
 prop_allVarsComposeSingle :: VarName -> VarName -> Property  
-prop_allVarsComposeSingle v1 v2 = v1 /= v2 ==> allVars (compose (single v2 (Var v1)) (single v1 (Var v2))) == [v1,v2]
+prop_allVarsComposeSingle v1 v2 = v1 /= v2 ==> listElem (allVars (compose (single v2 (Var v1)) (single v1 (Var v2)))) [v1,v2] && listElem [v1,v2] (allVars (compose (single v2 (Var v1)) (single v1 (Var v2))))
 
 prop_DomainAllVars :: Subst -> Bool
 prop_DomainAllVars s = listElem (domain s) (allVars s)
@@ -137,6 +142,16 @@ prop_DomainRestrictEmpty n = null (domain (restrictTo Empty n))
 listElem :: Eq a => [a] -> [a] -> Bool
 listElem [] _     = True
 listElem (x:xs) y = x `elem` y && listElem xs (delete x y)
+
+termEquals :: Term -> Term -> Bool
+termEquals (Var _)           (Comb _ _)        = False 
+termEquals (Comb _ _)        (Var _)           = False
+termEquals (Var (VarName x)) (Var (VarName y)) = x == y
+termEquals (Comb x t1)       (Comb y t2)       = x == y && help t1 t2
+  where
+  help :: [Term] -> [Term] -> Bool
+  help []     []     = True
+  help (x:xs) (y:ys) = termEquals x y && help xs ys
 
 -- Check all properties in this module:
 return []
