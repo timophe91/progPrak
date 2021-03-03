@@ -1,7 +1,7 @@
 module Variables where
 
 import Type
-import Control.Monad
+import Substitution
 
 class Vars v where
     allVars :: v -> [VarName]
@@ -19,6 +19,10 @@ instance Vars Prog where
 
 instance Vars Goal where
     allVars (Goal t) = concatMap allVars t
+
+instance Vars Subst where
+    allVars Empty    = []
+    allVars (Subs v) = concatMap fst v
 
 
 {- Generating a endless list of VarNames with the form:
