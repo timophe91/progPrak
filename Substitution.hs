@@ -89,8 +89,8 @@ prop_ApplyEmpty t = t == apply Empty t
 prop_ApplySingle :: VarName -> Term -> Bool
 prop_ApplySingle v t = apply (single v t) (Var v) == t
 
---prop_ApplyCompose :: Subst -> Subst -> Term -> Bool 
---prop_ApplyCompose s1 s2 t = apply (compose s1 s2) t == apply s1 (apply s2 t)
+prop_ApplyCompose :: Subst -> Subst -> Term -> Bool 
+prop_ApplyCompose s1 s2 t = apply (compose s1 s2) t == apply s1 (apply s2 t)
 
 prop_DomainEmpty :: Bool
 prop_DomainEmpty = null (domain Empty)
