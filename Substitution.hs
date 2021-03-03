@@ -1,6 +1,7 @@
 module Substitution where
 
 import Type
+import Data.List
 
 --type Subst = [(VarName , Term)] kann weg
 data Subst = Empty | Subs [(VarName, Term)]
@@ -50,7 +51,7 @@ compose (Subs (y:ys)) s2 = concatSubs (composeHelp (Subs [y]) s2) (compose (Subs
 concatSubs :: Subst -> Subst -> Subst
 concatSubs Empty x           = x
 concatSubs x     Empty       = x
-concatSubs (Subs x) (Subs y) = Subs (x ++ y)
+concatSubs (Subs x) (Subs y) = Subs (nub (x ++ y))
 
 {- Restricts the domain of a substitution to a given set of variables
 -}
