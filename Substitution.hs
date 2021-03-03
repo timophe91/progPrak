@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Substitution where
 
 import Type
@@ -44,7 +45,7 @@ compose (Subs (su:sus)) s2 = concatSubs (composeHelp (Subs [su]) s2) (compose (S
     composeHelp :: Subst -> Subst -> Subst
     composeHelp (Subs [(v, t)]) (Subs ((v2, t2):ys))
      | v == v2     = concatSubs (compose (Subs [(v, t)]) (Subs ys)) (single v2 (apply (Subs [(v, t)]) t2)) -- if two VarName r the same: A -> B, A -> C
-     | t == Var v2 = concatSubs (compose (Subs [(v, t)]) (Subs ys)) (single v  (apply (Subs [(v, t)]) t2)) -- if u have A -> B , B -> C
+     | t == Var v2 = concatSubs (compose (Subs [(v, t)]) (Subs ys)) (single v  t2) -- if u have A -> B , B -> C
      | otherwise   = concatSubs (concatSubs (single v t) (single v2 (apply (Subs [(v, t)]) t2))) (compose (Subs [(v, t)]) (Subs ys)) -- every other case
 
 {- Concatenate two Subst and removing duplicates
@@ -61,16 +62,30 @@ concatSubs (Subs x) (Subs y)    = Subs (removeDups (x ++ y))
 {- Restricts the domain of a substitution to a given set of variables
 -}
 restrictTo :: Subst -> [VarName] -> Subst
+restrictTo _         []       = Empty
+restrictTo Empty     _        = Empty
 restrictTo (Subs []) _        = Empty
 restrictTo (Subs ((x,y):s)) n = if x `elem` n then  compose (single x y) (restrictTo (Subs s) n) else restrictTo (Subs s) n
 
 
 instance Arbitrary Subst where
-  arbitrary do
-    [x] <- arbitrary
-    [y] <- arbitrary
-    z <- [(v,t)| v <- x, t <- y]
-    oneof [return (Subst Empty), return (Subst z)]
+  arbitrary = do
+    x <- arbitrary
+    y <- arbitrary
+    oneof [return Empty, return (Subs [(v,t)| v <- x, t <- y])]
 
-test :: Subst -> Bool
-test = empty == Empty
+prop_ApplyEmpty :: Term -> Bool
+prop_ApplyEmpty t = t == apply Empty t
+
+prop_ApplySingle :: VarName -> Term -> Bool
+prop_ApplySingle v t = apply (single v t) (Var v) == t
+
+prop_ApplyCompose :: Subst -> Subst -> Term -> Bool 
+prop_ApplyCompose s1 s2 t = apply (compose s1 s2) t == apply s1 (apply s2 t) 
+
+--prop_domainrestrict :: Subst -> [VarName] -> Bool
+--prop_domainrestrict s v = domain(restrictTo s v) == v
+
+-- Check all properties in this module:
+return []
+testAll = $quickCheckAll
