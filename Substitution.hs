@@ -30,26 +30,27 @@ single v t        = Subs [(v, t)]
 -}
 apply :: Subst -> Term -> Term
 apply Empty      t                = t
+apply (Subs [])  t                = t
 apply (Subs ((x,y):s)) (Var v)    = if x == v then y else apply (Subs s) (Var v)
 apply s             (Comb n t)    = Comb n [apply s x| x <- t]
 
 compose :: Subst -> Subst -> Subst
 compose s1    Empty             = s1
 compose Empty s2                = s2
-compose x     (Subs ((v,t):ys)) = concatSingle (help x v t) (compose x (Subs ys))
+compose (Subs [])     s2        = Empty
+compose s1    (Subs [])         = Empty
+compose (Subs (y:ys)) s2 = concatSubs (composeHelp (Subs [y]) s2) (compose (Subs ys) s2)
   where
-  varNames :: Subst -> [VarName]
-  varNames Empty    = []
-  varNames (Subs (v:vs)) = fst v : varNames (Subs vs)
-  varTerms Empty    = []
-  varTerms (Subs (v:vs)) = snd v : varTerms (Subs vs)
-  help :: Subst -> VarName -> Term -> Subst
-  help x v t = single v (apply x t)
+    composeHelp :: Subst -> Subst -> Subst
+    composeHelp (Subs [(v, t)]) (Subs ((v2, t2):ys))
+     | v == v2     = concatSubs (single v2 (apply (Subs [(v, t)]) t2)) (compose (Subs [(v, t)]) (Subs ys))
+     | t == Var v2 = concatSubs (single v (apply (Subs [(v, t)]) t2)) (compose (Subs [(v, t)]) (Subs ys))
+     | otherwise   = concatSubs (compose (single v2 (apply (Subs [(v, t)]) t2)) (compose (Subs [(v, t)]) (Subs ys))) (single v t)
 
-concatSingle :: Subst -> Subst -> Subst
-concatSingle Empty x           = x
-concatSingle x     Empty       = x
-contatSingle (Subs x) (Subs y) = Subs (x ++ y)
+concatSubs :: Subst -> Subst -> Subst
+concatSubs Empty x           = x
+concatSubs x     Empty       = x
+concatSubs (Subs x) (Subs y) = Subs (x ++ y)
 
 {- Restricts the domain of a substitution to a given set of variables
 -}
