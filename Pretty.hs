@@ -26,7 +26,7 @@ instance Pretty Term where
 {- Pretty output for Substitutions
  - pretty :: Subst -> String
 -}
-instance Pretty  Subst where
+instance Pretty Subst where
   pretty Empty = "{}" 
   pretty (Subs s)  = "{" ++ comma (map (\(v, t) -> show v ++ " -> " ++ pretty t) s) ++ "}"
 
