@@ -1,7 +1,7 @@
 module Substitution where
 
 import Type
-import Data.List
+import Test.QuickCheck
 
 --type Subst = [(VarName , Term)] kann weg
 data Subst = Empty | Subs [(VarName, Term)]
@@ -58,3 +58,14 @@ concatSubs (Subs x) (Subs y) = Subs (nub (x ++ y))
 restrictTo :: Subst -> [VarName] -> Subst
 restrictTo (Subs []) _        = Empty
 restrictTo (Subs ((x,y):s)) n = if x `elem` n then  compose (single x y) (restrictTo (Subs s) n) else restrictTo (Subs s) n
+
+
+instance Arbitrary Subst where
+  arbitrary do
+    [x] <- arbitrary
+    [y] <- arbitrary
+    z <- [(v,t)| v <- x, t <- y]
+    oneof [return (Subst Empty), return (Subst z)]
+
+test :: Subst -> Bool
+test = empty == Empty
