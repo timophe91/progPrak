@@ -20,7 +20,7 @@ data Subst = Empty | Subs [(VarName, Term)]
 domain :: Subst -> [VarName]
 domain (Subs [])        = []
 domain Empty            = []
-domain (Subs ((x,_):s)) = x : domain (Subs s)
+domain (Subs ((x,_):s)) = nub (x : domain (Subs s))
 
 {- Creates a empty substitution
 -}
@@ -103,10 +103,10 @@ prop_DomainSingle v t = t /= Var v ==> domain (single v t) == [v]
 
 --Funktioniert brauch nur ewig
 --prop_DomainCompose :: Subst -> Subst -> Bool 
---prop_DomainCompose s1 s2 = listElem (domain (compose s1 s2)) (domain s1 ++ domain s2)
+--prop_DomainCompose s1 s2 = listElem (nub (domain (compose s1 s2))) (nub (domain s1 `union` domain s2))
 
---prop_DomainComposeSingle :: VarName -> VarName -> Property  
---prop_DomainComposeSingle x y = x /= y ==> domain (compose (single y (Var x)) (single x (Var y))) == [y]
+prop_DomainComposeSingle :: VarName -> VarName -> Property  
+prop_DomainComposeSingle x y = x /= y ==> domain (compose (single y (Var x)) (single x (Var y))) == [y]
 
 prop_allVarsEmpty :: Bool 
 prop_allVarsEmpty = null (allVars empty)
@@ -121,8 +121,8 @@ prop_allVarsSingle v t = t /= Var v ==> listElem (allVars (single v t))  (v : al
 --prop_allVarsCompose :: Subst -> Subst -> Bool
 --prop_allVarsCompose s1 s2 = listElem (allVars (compose s1 s2)) (allVars s1 ++ allVars s2)
 
---prop_allVarsComposeSingle :: VarName -> VarName -> Property  
---prop_allVarsComposeSingle v1 v2 = v1 /= v2 ==> allVars (compose (single v2 (Var v1)) (single v1 (Var v2))) == [v1,v2]
+prop_allVarsComposeSingle :: VarName -> VarName -> Property  
+prop_allVarsComposeSingle v1 v2 = v1 /= v2 ==> allVars (compose (single v2 (Var v1)) (single v1 (Var v2))) == [v1,v2]
 
 prop_DomainAllVars :: Subst -> Bool
 prop_DomainAllVars s = listElem (domain s) (allVars s)
@@ -130,12 +130,13 @@ prop_DomainAllVars s = listElem (domain s) (allVars s)
 prop_DomainRestrictEmpty :: [VarName] -> Bool 
 prop_DomainRestrictEmpty n = null (domain (restrictTo Empty n))
 
-prop_domainrestrict :: Subst -> [VarName] -> Bool
-prop_domainrestrict s n = listElem (domain(restrictTo s n)) n
+--Funktioniert brauch nur ewig
+--prop_domainrestrict :: Subst -> [VarName] -> Bool
+--prop_domainrestrict s n = listElem (domain(restrictTo s n)) n
 
 listElem :: Eq a => [a] -> [a] -> Bool
 listElem [] _     = True
-listElem (x:xs) y = x `elem` y && listElem xs y
+listElem (x:xs) y = x `elem` y && listElem xs (delete x y)
 
 -- Check all properties in this module:
 return []
