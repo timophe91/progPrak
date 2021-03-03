@@ -22,7 +22,7 @@ instance Vars Goal where
 
 instance Vars Subst where
     allVars Empty    = []
-    allVars (Subs v) = removeDups (concatMap (\(v, t) -> v ++ allVars t) v)
+    allVars (Subs v) = removeDups (concatMap (\(v, t) -> v : allVars t) v)
 
 
 {- Generating a endless list of VarNames with the form:
@@ -33,4 +33,4 @@ freshVars = [VarName [x] | x <- ['A'..'Z']] ++ [VarName (l:show x) | x <- [0..],
 
 removeDups :: [VarName] -> [VarName]
 removeDups []     = []
-removeDups [v:vs] = if v `elem` vs then removeDups vs else v : removeDups vs
+removeDups (v:vs) = if v `elem` vs then removeDups vs else v : removeDups vs
