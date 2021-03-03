@@ -3,12 +3,13 @@ module Pretty
   where
 
 import Type
+import Substitution
 
 {- A Class for a pretty output of datatypes
 -}
 class Show a => Pretty a where
   pretty ::  a -> String
-  pretty a = "\"" ++ show a ++ "\"\n"
+  pretty a = show a
 
 
 {- Pretty output Simple Prolog Terms
@@ -20,9 +21,14 @@ instance Pretty Term where
   pretty (Comb "." [t1,t2]) = "[" ++ prettyLists t1 t2 ++ "]"
   pretty (Comb c []) = c
   pretty (Comb c t) = c ++ "(" ++ comma (map pretty t) ++ ")"
-    where comma:: [String] -> String -- setting a comma between all elements and concat them to one string
-          comma [x]    = x
-          comma (x:xs) = (x ++ ", ") ++ comma xs
+
+
+{- Pretty output for Substitutions
+ - pretty :: Subst -> String
+-}
+instance Pretty  Subst where
+  pretty Empty = "{}" 
+  pretty (Subs s)  = "{" ++ comma (map (\(v, t) -> show v ++ " -> " ++ pretty t) s) ++ "}"
 
 
 {- A function to pretty Prolog Lists
@@ -34,6 +40,10 @@ prettyLists (Comb c [])        (Comb "." [t1, t2]) = c ++ ", " ++ prettyLists t1
 prettyLists t                  (Comb "[]" [])      = pretty t
 prettyLists t1                 t2                  = pretty t1 ++ "|" ++ pretty t2
 
+-- setting a comma between all elements and concat them to one string
+comma :: [String] -> String 
+comma [x]    = x         
+comma (x:xs) = (x ++ ", ") ++ comma xs        
 
 
 
