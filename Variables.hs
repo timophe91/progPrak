@@ -9,20 +9,20 @@ class Vars v where
 
 instance Vars Term where
     allVars (Var v)    = [v]
-    allVars (Comb _ t) = concatMap allVars t
+    allVars (Comb _ t) = removeDups (concatMap allVars t)
 
 instance Vars Rule where
-    allVars (Rule x t) = allVars x ++ concatMap allVars t
+    allVars (Rule x t) = removeDups (allVars x ++ concatMap allVars t)
 
 instance Vars Prog where
-    allVars (Prog r) = concatMap allVars r
+    allVars (Prog r) = removeDups (concatMap allVars r)
 
 instance Vars Goal where
-    allVars (Goal t) = concatMap allVars t
+    allVars (Goal t) = removeDups (concatMap allVars t)
 
 instance Vars Subst where
     allVars Empty    = []
-    allVars (Subs v) = concatMap fst v
+    allVars (Subs v) = removeDups (concatMap (\(v, t) -> v ++ allVars t) v)
 
 
 {- Generating a endless list of VarNames with the form:
@@ -30,3 +30,7 @@ instance Vars Subst where
 -}
 freshVars :: [VarName]    
 freshVars = [VarName [x] | x <- ['A'..'Z']] ++ [VarName (l:show x) | x <- [0..],  l <- ['A'..'Z']]
+
+removeDups :: [VarName] -> [VarName]
+removeDups []     = []
+removeDups [v:vs] = if v `elem` vs then removeDups vs else v : removeDups vs
