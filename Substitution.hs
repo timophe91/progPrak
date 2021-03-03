@@ -1,6 +1,7 @@
 module Substitution where
 
 import Type
+import Data.List
 
 data Subst = Empty | Subs [(VarName, Term)]
   deriving (Eq, Show)
@@ -49,6 +50,7 @@ compose (Subs (su:sus)) s2 = concatSubs (composeHelp (Subs [su]) s2) (compose (S
 {- Concatenate two Subst and removing duplicates
 -}
 concatSubs :: Subst -> Subst -> Subst
+<<<<<<< HEAD
 concatSubs Empty    x           = x
 concatSubs x        Empty       = x
 concatSubs (Subs x) (Subs y)    = Subs (removeDups (x ++ y))
