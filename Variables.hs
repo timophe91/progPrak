@@ -23,7 +23,7 @@ instance Vars Goal where
  - [VarName "A", ... ,VarName "Z", VarName "A0", ... ,VarName "Z0", VarName "A1", ... , VarName "Z1", ... ]
 -}
 freshVars :: [VarName]    
-freshVars = [VarName [x] | x <- ['A'..'Z']] ++ [VarName (l:show x) | x <- [0..],  l <- ['A'..'Z']]
+freshVars = [VarName [x] | x <- ['A'..'Z']] ++ [VarName (l:show x) | x <- ['0'..],  l <- ['A'..'Z']]
 
 removeDups :: [VarName] -> [VarName]
 removeDups []     = []

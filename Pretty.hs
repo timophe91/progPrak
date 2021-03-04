@@ -32,6 +32,7 @@ prettyLists t1                 t2                  = pretty t1 ++ "|" ++ pretty 
 
 -- setting a comma between all elements and concat them to one string
 comma :: [String] -> String 
+comma []     = []
 comma [x]    = x         
 comma (x:xs) = (x ++ ", ") ++ comma xs        
 
