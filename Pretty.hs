@@ -1,9 +1,7 @@
 module Pretty
-  (pretty)
   where
 
 import Type
-import Substitution
 
 {- A Class for a pretty output of datatypes
 -}
@@ -21,14 +19,6 @@ instance Pretty Term where
   pretty (Comb "." [t1,t2]) = "[" ++ prettyLists t1 t2 ++ "]"
   pretty (Comb c []) = c
   pretty (Comb c t) = c ++ "(" ++ comma (map pretty t) ++ ")"
-
-
-{- Pretty output for Substitutions
- - pretty :: Subst -> String
--}
-instance Pretty Subst where
-  pretty Empty = "{}" 
-  pretty (Subs s)  = "{" ++ comma (map (\(VarName v, t) -> v ++ " -> " ++ pretty t) s) ++ "}"
 
 
 {- A function to pretty Prolog Lists
