@@ -102,7 +102,7 @@ instance Arbitrary Subst where
   arbitrary = do
     x <- arbitrary -- List of VarNames
     y <- arbitrary -- List of Terms
-    oneof [return (Subs []), return (Subs ( [(v,t)| v <-  x, t <- y]))] -- returns ether the empty substitution or a random substitution created using the List of VarNames and Terms
+    oneof [return (Subs []), return (Subs ([(v,t)| v <-  x, t <- y]))] -- returns ether the empty substitution or a random substitution created using the List of VarNames and Terms
 
 
 {- Empty applyed to a term souldnt change the term
@@ -192,7 +192,8 @@ listElem []     _ = True
 listElem (x:xs) y = x `elem` y && listElem xs (delete x y)
 
 
-
+{- Test all props_
+-}
 return []
 testAllSubstitution :: IO Bool
 testAllSubstitution = $quickCheckAll
