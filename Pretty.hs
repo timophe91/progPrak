@@ -3,6 +3,7 @@ module Pretty
 
 import Type
 
+
 {- A Class for a pretty output of datatypes
 -}
 class Show a => Pretty a where
@@ -15,10 +16,10 @@ class Show a => Pretty a where
  - pretty :: Term -> String
 -}
 instance Pretty Term where 
-  pretty (Var (VarName v)) = v
+  pretty (Var (VarName v))  = v
   pretty (Comb "." [t1,t2]) = "[" ++ prettyLists t1 t2 ++ "]"
-  pretty (Comb c []) = c
-  pretty (Comb c t) = c ++ "(" ++ comma (map pretty t) ++ ")"
+  pretty (Comb c [])        = c
+  pretty (Comb c t)         = c ++ "(" ++ comma (map pretty t) ++ ")"
 
 
 {- A function to pretty Prolog Lists
@@ -32,6 +33,7 @@ prettyLists t1                 t2                  = pretty t1 ++ "|" ++ pretty 
 
 -- setting a comma between all elements and concat them to one string
 comma :: [String] -> String 
+comma []     = []
 comma [x]    = x         
 comma (x:xs) = (x ++ ", ") ++ comma xs        
 

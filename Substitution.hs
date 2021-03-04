@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Substitution
- (domain, empty, single, apply, compose, restrictTo, pretty, allVars)
+ (domain, empty, single, apply, compose, restrictTo, pretty, allVars, testAllSubstitution)
  where
 
 import Type
@@ -9,18 +9,19 @@ import Variables
 import Data.List
 import Pretty
 
-{- Instance for allVars from Vars
- - get all Variables from the Subs, also those from the Term
--}
-instance Vars Subst where
-    allVars (Subs []) = []
-    allVars (Subs v)  = removeDups (concatMap (\(v, t) -> v : allVars t) v)
 
 {- Wrapper for our List of Tupel
 -}
 newtype Subst
   = Subs [(VarName, Term)]
   deriving (Eq, Show)
+
+{- Instance for allVars from Vars
+ - get all Variables from the Subs, also those from the Term
+-}
+instance Vars Subst where
+    allVars (Subs []) = []
+    allVars (Subs v)  = removeDups (concatMap (\(v1, t1) -> v1 : allVars t1) v)
 
 {- Pretty output for Substitutions
  - pretty :: Subst -> String
@@ -72,12 +73,12 @@ removeDupsInSubs (Subs ((v, t):r)) = concatSubs (single v t) (removeDupsInSubs (
   where 
     removeOthers :: VarName -> [(VarName, Term)] -> [(VarName, Term)] -- remove every occurrence of v
     removeOthers _ []          =  []
-    removeOthers v ((v1, t):r) = if v == v1 then removeOthers v r else (v1, t) : removeOthers v r
+    removeOthers v0 ((v1, t1):r1) = if v0 == v1 then removeOthers v0 r1 else (v1, t1) : removeOthers v0 r1
 
 {- Apply Subst on every Term of the second Subst
 -}
 applyToAll :: Subst -> Subst -> Subst
-applyToAll s (Subs [])          =  empty
+applyToAll _ (Subs [])          =  empty
 applyToAll s (Subs ((v, t):xs)) =  concatSubs (single v (apply s t)) (applyToAll s (Subs xs)) 
 
 {- Concatenate two Subst
@@ -187,9 +188,11 @@ prop_domainrestrict s n = listElem (domain(restrictTo s n)) n
 {- Test if the first list is fully part of the second List
 -}
 listElem :: Eq a => [a] -> [a] -> Bool
-listElem [] _     = True
+listElem []     _ = True
 listElem (x:xs) y = x `elem` y && listElem xs (delete x y)
 
--- Check all properties in this module:
+
+
 return []
-testAll = $quickCheckAll
+testAllSubstitution :: IO Bool
+testAllSubstitution = $quickCheckAll
