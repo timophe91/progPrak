@@ -16,10 +16,10 @@ class Show a => Pretty a where
  - pretty :: Term -> String
 -}
 instance Pretty Term where 
-  pretty (Var (VarName v)) = v
+  pretty (Var (VarName v))  = v
   pretty (Comb "." [t1,t2]) = "[" ++ prettyLists t1 t2 ++ "]"
-  pretty (Comb c []) = c
-  pretty (Comb c t) = c ++ "(" ++ comma (map pretty t) ++ ")"
+  pretty (Comb c [])        = c
+  pretty (Comb c t)         = c ++ "(" ++ comma (map pretty t) ++ ")"
 
 
 {- A function to pretty Prolog Lists
