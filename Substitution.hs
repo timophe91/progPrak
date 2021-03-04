@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Substitution
- (domain, empty, single, apply, compose, restrictTo, pretty, allVars, testAll)
+ (domain, empty, single, apply, compose, restrictTo, pretty, allVars, testAllSubstitution)
  where
 
 import Type
@@ -161,5 +161,5 @@ listElem (x:xs) y = x `elem` y && listElem xs (delete x y)
 
 
 return []
-testAll :: IO Bool
-testAll = $quickCheckAll
+testAllSubstitution :: IO Bool
+testAllSubstitution = $quickCheckAll
