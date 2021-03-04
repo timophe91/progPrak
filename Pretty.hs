@@ -3,6 +3,7 @@ module Pretty
 
 import Type
 
+
 {- A Class for a pretty output of datatypes
 -}
 class Show a => Pretty a where

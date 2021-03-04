@@ -9,18 +9,19 @@ import Variables
 import Data.List
 import Pretty
 
-{- Instance for allVars from Vars
- - get all Variables from the Subs, also those from the Term
--}
-instance Vars Subst where
-    allVars (Subs []) = []
-    allVars (Subs v)  = removeDups (concatMap (\(v1, t1) -> v1 : allVars t1) v)
 
 {- Wrapper for our List of Tupel
 -}
 newtype Subst
   = Subs [(VarName, Term)]
   deriving (Eq, Show)
+
+{- Instance for allVars from Vars
+ - get all Variables from the Subs, also those from the Term
+-}
+instance Vars Subst where
+    allVars (Subs []) = []
+    allVars (Subs v)  = removeDups (concatMap (\(v1, t1) -> v1 : allVars t1) v)
 
 {- Pretty output for Substitutions
  - pretty :: Subst -> String
