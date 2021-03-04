@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Substitution
- (domain, empty, single, apply, compose, restrictTo, pretty, allVars, testAllSubstitution)
+ (domain, empty, single, apply, compose, restrictTo, pretty, allVars, testAllSubstitution, Subst)
  where
 
 import Type
@@ -79,7 +79,7 @@ removeDupsInSubs (Subs ((v, t):r)) = concatSubs (single v t) (removeDupsInSubs (
 -}
 applyToAll :: Subst -> Subst -> Subst
 applyToAll _ (Subs [])          =  empty
-applyToAll s (Subs ((v, t):xs)) =  concatSubs (single v (apply s t)) (applyToAll s (Subs xs)) 
+applyToAll s (Subs ((v, t):xs)) =  concatSubs (single v (apply s t)) (applyToAll s (Subs xs))
 
 {- Concatenate two Subst
 -}
@@ -138,7 +138,7 @@ prop_DomainSingle v t = t /= Var v ==> domain (single v t) == [v]
 {- the domain of a compose of two substitutions should be a subset of the union of the domains of the substitutions 
 -}
 prop_DomainCompose :: Subst -> Subst -> Bool 
-prop_DomainCompose s1 s2 = listElem (nub (domain (compose s1 s2))) (nub (domain s1 `union` domain s2))
+prop_DomainCompose s1 s2 = listElem (domain (compose s1 s2)) (domain s1 `union` domain s2)
 
 {- the domain of a compose of two singles forming a loob should be the domain of the single which is used second
 -}
@@ -184,6 +184,21 @@ prop_DomainRestrictEmpty n = null (domain (restrictTo empty n))
 -}
 prop_domainrestrict :: Subst -> [VarName] -> Bool
 prop_domainrestrict s n = listElem (domain(restrictTo s n)) n
+
+{- the domain of a composit of a substitution and empty should be a subset of the domain of the substitution
+-}
+prop_domainComposeSubstEmpty :: Subst -> Bool
+prop_domainComposeSubstEmpty s = listElem (domain (compose s empty)) (domain s)
+
+{- allVars from a composit of a substitution and empty should be a subset of allVars from the substitution
+-}
+prop_allVarsComposeSubstEmpty :: Subst -> Bool
+prop_allVarsComposeSubstEmpty s = listElem (allVars (compose s empty)) (allVars s)
+
+{- the compose of a substitution and empty (regardless which is the first substitution in compose) applyed to a term should be the same as just the substitution applyed to the term
+-}
+prop_applyComposeSubstEmpty :: Subst -> Term -> Bool
+prop_applyComposeSubstEmpty s t = apply (compose s empty) t == apply s t && apply (compose empty s) t == apply s t
 
 {- Test if the first list is fully part of the second List
 -}
