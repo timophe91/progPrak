@@ -13,8 +13,8 @@ import Pretty
  - get all Variables from the Subs, also those from the Term
 -}
 instance Vars Subst where
-    allVars (Subs [])    = []
-    allVars (Subs v) = removeDups (concatMap (\(v, t) -> v : allVars t) v)
+    allVars (Subs []) = []
+    allVars (Subs v)  = removeDups (concatMap (\(v, t) -> v : allVars t) v)
 
 {- Wrapper for our List of Tupel
 -}
@@ -51,9 +51,9 @@ single v t        = Subs [(v, t)]
 {- Applys a substitution to a given term
 -}
 apply :: Subst -> Term -> Term
-apply (Subs [])  t                = t
-apply (Subs ((x,y):s)) (Var v)    = if x == v then y else apply (Subs s) (Var v) -- replace Variable if found with first occurenc
-apply s             (Comb n t)    = Comb n [apply s x| x <- t] -- apply Subst on every Term in Comb
+apply (Subs [])  t             = t
+apply (Subs ((x,y):s)) (Var v) = if x == v then y else apply (Subs s) (Var v) -- replace Variable if found with first occurenc
+apply s             (Comb n t) = Comb n [apply s x| x <- t] -- apply Subst on every Term in Comb
 
 {- Merge two Prolog Substitutions
  - first removeAll duplicated VarNames from the Subst for CleanUp, if there r given Subst e.g. {A -> B, A -> C} => {A -> B}
@@ -62,16 +62,16 @@ apply s             (Comb n t)    = Comb n [apply s x| x <- t] -- apply Subst on
 compose :: Subst -> Subst -> Subst
 compose (Subs [])       s2        = removeDupsInSubs s2
 compose s1              (Subs []) = removeDupsInSubs s1
-compose s1              s2 = removeDupsInSubs (concatSubs (applyToAll (removeDupsInSubs s1) (removeDupsInSubs s2)) (removeDupsInSubs s1))
+compose s1              s2        = removeDupsInSubs (concatSubs (applyToAll (removeDupsInSubs s1) (removeDupsInSubs s2)) (removeDupsInSubs s1))
 
 {- remove every Subst, except the first occurrence
 -}
 removeDupsInSubs :: Subst -> Subst
-removeDupsInSubs (Subs []) = empty
+removeDupsInSubs (Subs [])         = empty
 removeDupsInSubs (Subs ((v, t):r)) = concatSubs (single v t) (removeDupsInSubs (Subs (removeOthers v r)))
   where 
     removeOthers :: VarName -> [(VarName, Term)] -> [(VarName, Term)] -- remove every occurrence of v
-    removeOthers _ [] =  []
+    removeOthers _ []          =  []
     removeOthers v ((v1, t):r) = if v == v1 then removeOthers v r else (v1, t) : removeOthers v r
 
 {- Apply Subst on every Term of the second Subst
@@ -83,17 +83,17 @@ applyToAll s (Subs ((v, t):xs)) =  concatSubs (single v (apply s t)) (applyToAll
 {- Concatenate two Subst
 -}
 concatSubs :: Subst -> Subst -> Subst
-concatSubs (Subs []) x           = x
-concatSubs x         (Subs [])   = x
-concatSubs (Subs x)  (Subs y)    = Subs (x ++ y)
+concatSubs (Subs []) x         = x
+concatSubs x         (Subs []) = x
+concatSubs (Subs x)  (Subs y)  = Subs (x ++ y)
 
 
 {- Restricts the domain of a substitution to a given set of variables
 -}
 restrictTo :: Subst -> [VarName] -> Subst
-restrictTo _         []       = empty
-restrictTo (Subs []) _        = empty
-restrictTo (Subs ((x,y):s)) n = if x `elem` n then  compose (single x y) (restrictTo (Subs s) n) else restrictTo (Subs s) n
+restrictTo _                [] = empty
+restrictTo (Subs [])        _  = empty
+restrictTo (Subs ((x,y):s)) n  = if x `elem` n then  compose (single x y) (restrictTo (Subs s) n) else restrictTo (Subs s) n
 
 {- Arbitraty instance for Subst
 -}
