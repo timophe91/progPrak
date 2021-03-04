@@ -60,15 +60,15 @@ apply s             (Comb n t)    = Comb n [apply s x| x <- t] -- apply Subst on
  - apply s1 on all Terms of s2 and concat them with s1 and then CleanUp Again, slow but works
 -}
 compose :: Subst -> Subst -> Subst
-compose (Subs [])       s2        = removeDupsinSubs s2
-compose s1              (Subs []) = removeDupsinSubs s1
-compose s1              s2 = removeDupsinSubs (concatSubs (applyToAll (removeDupsinSubs s1) (removeDupsinSubs s2)) (removeDupsinSubs s1))
+compose (Subs [])       s2        = removeDupsInSubs s2
+compose s1              (Subs []) = removeDupsInSubs s1
+compose s1              s2 = removeDupsInSubs (concatSubs (applyToAll (removeDupsInSubs s1) (removeDupsInSubs s2)) (removeDupsInSubs s1))
 
 {- remove every Subst, except the first occurrence
 -}
-removeDupsinSubs :: Subst -> Subst
-removeDupsinSubs (Subs []) = empty
-removeDupsinSubs (Subs ((v, t):r)) = concatSubs (single v t) (removeDupsinSubs (Subs (removeOthers v r)))
+removeDupsInSubs :: Subst -> Subst
+removeDupsInSubs (Subs []) = empty
+removeDupsInSubs (Subs ((v, t):r)) = concatSubs (single v t) (removeDupsInSubs (Subs (removeOthers v r)))
   where 
     removeOthers :: VarName -> [(VarName, Term)] -> [(VarName, Term)] -- remove every occurrence of v
     removeOthers _ [] =  []
