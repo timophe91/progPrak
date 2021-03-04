@@ -104,51 +104,83 @@ instance Arbitrary Subst where
     oneof [return (Subs []), return (Subs (nub [(v,t)| v <- nub x, t <- y]))]
 
 
+{- Empty applyed to a term souldnt change the term
+-}
 prop_ApplyEmpty :: Term -> Bool
 prop_ApplyEmpty t = t == apply empty t
 
+{- A Single applyed to a term with the same VarName should return the term defined in Single
+-}
 prop_ApplySingle :: VarName -> Term -> Bool
 prop_ApplySingle v t = apply (single v t) (Var v) == t
 
+{- Applying a compose should act as if the second substitution was applyed first and then the first
+-}
 prop_ApplyCompose :: Subst -> Subst -> Term -> Bool 
 prop_ApplyCompose s1 s2 t = apply (compose s1 s2) t ==  apply s1 (apply s2 t)
 
+{- The domain of Empty should be []
+-}
 prop_DomainEmpty :: Bool
 prop_DomainEmpty = null (domain empty)
 
+{- The domain of a single which references itself should be []
+-}
 prop_DomainSingleSelfReference :: VarName -> Bool 
 prop_DomainSingleSelfReference x = null (domain (single x (Var x)))
 
+{- The domain of a single which dose not refer to 
+-}
 prop_DomainSingle :: VarName -> Term -> Property  
 prop_DomainSingle v t = t /= Var v ==> domain (single v t) == [v]
 
+{- the domain of a compose of two substitutions should be a subset of the union of the domains of the substitutions 
+-}
 prop_DomainCompose :: Subst -> Subst -> Bool 
 prop_DomainCompose s1 s2 = listElem (nub (domain (compose s1 s2))) (nub (domain s1 `union` domain s2))
 
+{- the domain of a compose of two singles forming a loob should be the domain of the single which is used second
+-}
 prop_DomainComposeSingle :: VarName -> VarName -> Property  
 prop_DomainComposeSingle x y = x /= y ==> domain (compose (single y (Var x)) (single x (Var y))) == [y]
 
+{- allVars of Empty should be []
+-}
 prop_allVarsEmpty :: Bool 
 prop_allVarsEmpty = null (allVars empty)
 
+{- allVars of a single which references itself should be []
+-}
 prop_allVarsSingleSelfReference :: VarName -> Bool
 prop_allVarsSingleSelfReference x = null (allVars (single x (Var x)))
 
+{- allVars of a single which dose not reference itself should be the same as the union of allVars from the term and the varName of the single
+-}
 prop_allVarsSingle :: VarName -> Term -> Property 
-prop_allVarsSingle v t = t /= Var v ==> listElem (allVars (single v t))  (v : allVars t)
+prop_allVarsSingle v t = t /= Var v ==> listElem (allVars (single v t))  (allVars t `union` [v]) && listElem (allVars t `union` [v]) (allVars (single v t))
 
+{- allVars of a compose should be a subste of the union of allVars of the two substitutions 
+-}
 prop_allVarsCompose :: Subst -> Subst -> Bool
 prop_allVarsCompose s1 s2 = listElem (allVars (compose s1 s2)) (allVars s1 ++ allVars s2)
 
+{- allVars of a compose containing two singles which form a loop should be both terms used in the singles
+-}
 prop_allVarsComposeSingle :: VarName -> VarName -> Property  
 prop_allVarsComposeSingle v1 v2 = v1 /= v2 ==> listElem (allVars (compose (single v2 (Var v1)) (single v1 (Var v2)))) [v1,v2] && listElem [v1,v2] (allVars (compose (single v2 (Var v1)) (single v1 (Var v2))))
 
+{- the domain of a term should be a subset of allVars from that term
+-}
 prop_DomainAllVars :: Subst -> Bool
 prop_DomainAllVars s = listElem (domain s) (allVars s)
 
+{- the domain of Empty restricted to a list of variables schould still be []
+-}
 prop_DomainRestrictEmpty :: [VarName] -> Bool 
 prop_DomainRestrictEmpty n = null (domain (restrictTo empty n))
 
+{- the domain of a substitution restrictet to a list of variables should be a subset of the given list
+-}
 prop_domainrestrict :: Subst -> [VarName] -> Bool
 prop_domainrestrict s n = listElem (domain(restrictTo s n)) n
 
