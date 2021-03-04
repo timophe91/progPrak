@@ -100,9 +100,9 @@ restrictTo (Subs ((x,y):s)) n  = if x `elem` n then  compose (single x y) (restr
 -}
 instance Arbitrary Subst where
   arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
-    oneof [return (Subs []), return (Subs (nub [(v,t)| v <- nub x, t <- y]))]
+    x <- arbitrary -- List of VarNames
+    y <- arbitrary -- List of Terms
+    oneof [return (Subs []), return (Subs ( [(v,t)| v <-  x, t <- y]))] -- returns ether the empty substitution or a random substitution created using the List of VarNames and Terms
 
 
 {- Empty applyed to a term souldnt change the term
