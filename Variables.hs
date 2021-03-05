@@ -27,7 +27,7 @@ instance Vars Goal where -- All VarNames of Goal
 freshVars :: [VarName]    
 freshVars = [VarName [x] | x <- ['A'..'Z']] ++ [VarName (l:show x) | x <- ['0'..],  l <- ['A'..'Z']]
 
-{- Remove duplicated VarNames
+{- Remove duplicated VarNames, using the last occurrence
 -}
 removeDups :: [VarName] -> [VarName]
 removeDups []     = []
