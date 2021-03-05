@@ -12,7 +12,7 @@ ds :: Term -> Term -> Maybe (Term, Term)
 ds (Var (VarName "_")) _                   = Nothing -- If one of the Variables is anonymous return Nothing
 ds _                   (Var (VarName "_")) = Nothing
 ds (Var v)             t                   = if Var v == t then Nothing else Just (Var v, t) -- If one of the terms is a variable and the terms a not equal return the tuple of both terms
-ds t                   (Var v)             = if Var v == t then Nothing else Just (Var v, t)
+ds t                   (Var v)             = if Var v == t then Nothing else Just (Var v, t) -- for unify changed order
 ds (Comb v1 t1)        (Comb v2 t2)        = if v1 /= v2 || length t1 /= length t2 then Just (Comb v1 t1, Comb v2 t2) else help t1 t2 -- If both terms are funktions with the same name and number of terms in the list return the first element which differs
   where
   {- Surches and returns the first tuple of terms in two lists which are not the same
