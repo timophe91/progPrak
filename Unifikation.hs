@@ -20,6 +20,7 @@ ds (Comb v1 t1)        (Comb v2 t2)        = if v1 /= v2 || length t1 /= length 
   -}
   help []     []     = Nothing
   help (x:xs) (y:ys) = let result = ds x y in if isNothing result then help xs ys else result
+  help _      _      = Nothing --Wegen -Wall wird aber nie genutzt
 
 
 
@@ -28,7 +29,7 @@ unify x y = let t = help x y empty in if t == Just empty then Nothing else t
   where
   help t1 t2 s = let d = ds (apply s t1) (apply s t2) in if isNothing d then Just s else help2 t1 t2 d s
   help2 _ _ Nothing             _ = Nothing
-  help2 x y (Just (Var d1, d2)) s = if d1 `elem` allVars d2 then Nothing else help x y (compose (single d1 d2) s)
+  help2 i j (Just (Var d1, d2)) s = if d1 `elem` allVars d2 then Nothing else help i j (compose (single d1 d2) s)
   help2 _ _ _ _                    = Nothing
 
 prop_Equals :: Term -> Bool
