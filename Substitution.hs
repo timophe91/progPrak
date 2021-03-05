@@ -63,7 +63,7 @@ apply s             (Comb n t) = Comb n [apply s x| x <- t] -- apply Subst on ev
 compose :: Subst -> Subst -> Subst
 compose (Subs [])       s2        = removeDupsInSubs s2
 compose s1              (Subs []) = removeDupsInSubs s1
-compose s1              s2        = removeDupsInSubs (concatSubs (applyToAll (removeDupsInSubs s1) (removeDupsInSubs s2)) (removeDupsInSubs s1))
+compose s1              s2        = let cleans1 = removeDupsInSubs s1 in removeDupsInSubs (concatSubs (applyToAll cleans1 (removeDupsInSubs s2)) cleans1)
 
 {- remove every Subst, except the first occurrence
 -}

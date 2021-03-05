@@ -1,4 +1,5 @@
 module Pretty
+  (pretty, comma, Pretty)
   where
 
 import Type
@@ -39,17 +40,7 @@ comma (x:xs) = (x ++ ", ") ++ comma xs
 
 
 
-
-
-
-
-
-
-
-
-
-
----------------------------------------------------- 
+{----------------------------------------------------- Nur für Testzwecke
 test:: IO()
 test = do putStrLn "Var (VarName \"A\")"
           putStrLn (pretty (Var (VarName "A")))
@@ -96,3 +87,4 @@ test = do putStrLn "Var (VarName \"A\")"
           putStrLn "Comb \".\" [Var (VarName \"K\"), Comb \".\" [Var (VarName \"L\"), Var (VarName \"M\"), Var (VarName \"N\"), Var (VarName \"O\")]]"
           putStrLn (pretty (Comb "." [Var (VarName "K"), Comb "." [Var (VarName "L"), Var (VarName "M"), Var (VarName "N"), Var (VarName "O")]]))
           putStrLn ("[K|.(L, M, N, O)]" ++ "\n")
+          -}

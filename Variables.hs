@@ -1,4 +1,6 @@
-module Variables where
+module Variables 
+  (allVars, freshVars, removeDups, Vars)
+  where
 
 import Type
 
