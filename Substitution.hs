@@ -154,7 +154,7 @@ prop_allVarsSingleSelfReference x = null (allVars (single x (Var x)))
 {- 11. allVars of a single which dose not reference itself should be the same as the union of allVars from the term and the varName of the single
 -}
 prop_allVarsSingle :: VarName -> Term -> Property 
-prop_allVarsSingle v t = t /= Var v ==> subSet (allVars (single v t))  (allVars t `union` [v]) && subSet (allVars t `union` [v]) (allVars (single v t))
+prop_allVarsSingle v t = t /= Var v ==> subSet (allVars (single v t)) (allVars t `union` [v]) && subSet (allVars t `union` [v]) (allVars (single v t))
 
 {- 12. allVars of a compose should be a subset of the union of allVars of the two substitutions 
 -}
