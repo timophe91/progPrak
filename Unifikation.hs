@@ -5,6 +5,7 @@ import Type
 import Test.QuickCheck
 import Substitution
 import Data.Maybe
+import Variables
 
 {- Calculates the disagreement set of two Terms. Returns Nothing if the disagreement set is empty
 -}
@@ -29,13 +30,16 @@ unify x y = let t = help x y empty in if t == Just empty then Nothing else t
   help t1 t2 s = let d = ds (apply s t1) (apply s t2) in if isNothing d then Just s else help2 t1 t2 d s
   help2 _ _ Nothing             _ = Nothing
   help2 i j (Just (Var d1, d2)) s = if d1 `elem` allVars d2 then Nothing else help i j (compose (single d1 d2) s)
-  help2 _ _ _ _                   = Nothing
+  help2 _ _ _                   _ = Nothing
 
 prop_Equals :: Term -> Bool
 prop_Equals t = isNothing (ds t t)
 
 prop_NotEquals :: Term -> Term -> Property
-prop_NotEquals t1 t2 = t1 /= t2 ==> isJust (ds t1 t2)
+prop_NotEquals (Var v1) (Var v2) = Var v1 /= Var v2 ==> if v1 /= VarName "_" && v2 /= VarName "_" then  isJust (ds (Var v1) (Var v2)) else isNothing (ds (Var v1) (Var v2))
+prop_NotEquals (Var v)  t        = Var v /= t ==> if v /= VarName "_" then isJust (ds (Var v) t) else isNothing (ds (Var v) t)
+prop_NotEquals t        (Var v)  = Var v /= t ==> if v /= VarName "_" then isJust (ds (Var v) t) else isNothing (ds (Var v) t)
+prop_NotEquals t1       t2       = t1 /= t2 ==> isJust (ds t1 t2)
 
 {- Test all props_
 -}
