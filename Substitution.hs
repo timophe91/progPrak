@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Substitution
- (domain, empty, single, apply, compose, restrictTo, testAllSubstitution, Subst)
+ (domain, pretty, allVars, empty, single, apply, compose, restrictTo, testAllSubstitution, Subst)
  where
 
 import Type
