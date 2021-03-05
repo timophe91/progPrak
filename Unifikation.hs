@@ -35,7 +35,7 @@ unify x y = let t = help x y empty in if t == Just empty then Nothing else t
 prop_Equals :: Term -> Bool
 prop_Equals t = isNothing (ds t t)
 
-prop_NotEquals :: Term -> Term -> Property 
+prop_NotEquals :: Term -> Term -> Property
 prop_NotEquals t1 t2 = t1 /= t2 ==> isJust (ds t1 t2)
 
 {- Test all props_

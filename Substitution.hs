@@ -52,18 +52,18 @@ single v t        = Subs [(v, t)]
 {- Applys a substitution to a given term
 -}
 apply :: Subst -> Term -> Term
-apply (Subs [])  t             = t
-apply (Subs ((x,y):s)) (Var v) = if x == v then y else apply (Subs s) (Var v) -- replace Variable if found with first occurenc
-apply s             (Comb n t) = Comb n [apply s x| x <- t] -- apply Subst on every Term in Comb
+apply (Subs [])        t          = t
+apply (Subs ((x,y):s)) (Var v)    = if x == v then y else apply (Subs s) (Var v) -- replace Variable if found with first occurenc
+apply s                (Comb n t) = Comb n [apply s x| x <- t] -- apply Subst on every Term in Comb
 
 {- Merge two Prolog Substitutions
  - first removeAll duplicated VarNames from the Subst for CleanUp, if there r given Subst e.g. {A -> B, A -> C} => {A -> B}
  - apply s1 on all Terms of s2 and concat them with s1 and then CleanUp Again, slow but works
 -}
 compose :: Subst -> Subst -> Subst
-compose (Subs [])       s2        = removeDupsInSubs s2
-compose s1              (Subs []) = removeDupsInSubs s1
-compose s1              s2        = removeDupsInSubs (concatSubs (applyToAll (removeDupsInSubs s1) (removeDupsInSubs s2)) (removeDupsInSubs s1))
+compose (Subs []) s2        = removeDupsInSubs s2
+compose s1        (Subs []) = removeDupsInSubs s1
+compose s1        s2        = removeDupsInSubs (concatSubs (applyToAll (removeDupsInSubs s1) (removeDupsInSubs s2)) (removeDupsInSubs s1))
 
 {- remove every Subst, except the first occurrence
 -}
@@ -158,7 +158,7 @@ prop_allVarsSingleSelfReference x = null (allVars (single x (Var x)))
 {- allVars of a single which dose not reference itself should be the same as the union of allVars from the term and the varName of the single
 -}
 prop_allVarsSingle :: VarName -> Term -> Property 
-prop_allVarsSingle v t = t /= Var v ==> listElem (allVars (single v t))  (allVars t `union` [v]) && listElem (allVars t `union` [v]) (allVars (single v t))
+prop_allVarsSingle v t = t /= Var v ==> listElem (allVars (single v t)) (allVars t `union` [v]) && listElem (allVars t `union` [v]) (allVars (single v t))
 
 {- allVars of a compose should be a subste of the union of allVars of the two substitutions 
 -}
