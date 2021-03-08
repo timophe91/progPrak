@@ -14,8 +14,9 @@ interactive = do
 looping :: IO()
 looping = do
     x <- readFromUser -- read user input
-    unless (x /= ":q") -- do the loop until it quits
-      $ printResponse (evalAction parseLine) >> looping
+    -- TODO: eval etc.
+    --unless (x /= ":q") -- do the loop until it quits
+    --  $ printResponse (evalAction parseLine) >> looping
       
 
 evalAction :: Char -> String -> String
@@ -29,7 +30,7 @@ evalAction c l | c == 'h' = helpWaggon
 
 parseLine :: String -> (Char, String)
 parseLine (s:rs) | s == ':' = (head rs, dropWhile isSpace (tail rs)) -- parse the first char after : and remove whitespaces
-                 | otherwise = ('g', s:rs) otherwise it should be a goal 
+                 | otherwise = ('g', s:rs) -- otherwise it should be a goal 
 
 
 readFromUser :: IO String
