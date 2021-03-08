@@ -23,14 +23,14 @@ ds (Comb v1 t1)        (Comb v2 t2)        = if v1 /= v2 || length t1 /= length 
   help _      _      = Nothing --Wegen -Wall wird aber nie genutzt
 
 
-
+{- Calculates the most general unifier of two terms
+-}
 unify :: Term -> Term -> Maybe Subst
-unify x y = let t = help x y empty in if t == Just empty then Nothing else t
+unify x y = if x == y then Just empty else let t = help x y empty in if t == Just empty then Nothing else t
   where
-  help t1 t2 s = let d = ds (apply s t1) (apply s t2) in if isNothing d then Just s else help2 t1 t2 d s
-  help2 _ _ Nothing             _ = Nothing
+  help t1 t2 s = let d = ds (apply s t1) (apply s t2) in if isNothing d then Just s else help2 t1 t2 d s -- calculate the ds and generate the new substitution if ds is not Nothing
   help2 i j (Just (Var d1, d2)) s = if d1 `elem` allVars d2 then Nothing else help i j (compose (single d1 d2) s)
-  help2 _ _ _                   _ = Nothing
+  help2 _ _ _                   _ = Nothing --Wegen -Wall wird aber nie genutzt
 
 prop_Equals :: Term -> Bool
 prop_Equals t = isNothing (ds t t)
@@ -39,16 +39,10 @@ prop_dsNotEmpty :: Term -> Term -> Property
 prop_dsNotEmpty t1 t2 = isJust (ds t1 t2) ==> t1 /= t2
 
 prop_dsEmpty :: Term -> Term -> Property
-prop_dsEmpty t1 t2 = isNothing (ds t1 t2) ==> let u = unify t1 t2 in isJust u && null (domain (fromMaybe empty u))
+prop_dsEmpty t1 t2 = isNothing (ds t1 t2) && VarName "_" `notElem` allVars t1 ++ allVars t2 ==> let u = unify t1 t2 in isJust u && null (domain (fromMaybe empty u))
 
 prop_unify :: Term -> Term -> Property
 prop_unify t1 t2 = isJust (unify t1 t2) ==> let u = fromMaybe empty (unify t1 t2) in isNothing (ds (apply u t1) (apply u t2))
-
-{-prop_NotEquals :: Term -> Term -> Property
-prop_NotEquals (Var v1) (Var v2) = Var v1 /= Var v2 ==> if v1 /= VarName "_" && v2 /= VarName "_" then  isJust (ds (Var v1) (Var v2)) else isNothing (ds (Var v1) (Var v2))
-prop_NotEquals (Var v)  t        = Var v /= t ==> if v /= VarName "_" then isJust (ds (Var v) t) else isNothing (ds (Var v) t)
-prop_NotEquals t        (Var v)  = Var v /= t ==> if v /= VarName "_" then isJust (ds (Var v) t) else isNothing (ds (Var v) t)
-prop_NotEquals t1       t2       = t1 /= t2 ==> isJust (ds t1 t2)-}
 
 
 {- Test all props_
