@@ -18,19 +18,22 @@ ds (Comb v1 t1)        (Comb v2 t2)        = if v1 /= v2 || length t1 /= length 
   where
   {- Surches and returns the first tuple of terms in two lists which are not the same
   -}
+  help :: [Term] -> [Term] -> Maybe (Term, Term)
   help []     []     = Nothing
   help (x:xs) (y:ys) = let result = ds x y in if isNothing result then help xs ys else result
-  help _      _      = Nothing --Wegen -Wall wird aber nie genutzt
+  help _      _      = Nothing --Wegen -Wall
 
 
 {- Calculates the most general unifier of two terms
 -}
 unify :: Term -> Term -> Maybe Subst
-unify x y = if x == y then Just empty else let t = help x y empty in t
+unify x y = if x == y then Just empty else help x y empty
   where
+  help :: Term -> Term -> Subst -> Maybe Subst
   help t1 t2 s = let d = ds (apply s t1) (apply s t2) in if isNothing d then Just s else help2 t1 t2 d s -- calculate the ds and generate the new substitution if ds is not Nothing
+  help2 :: Term -> Term -> Maybe (Term, Term) -> Subst -> Maybe Subst
   help2 i j (Just (Var d1, d2)) s = if d1 `elem` allVars d2 then Nothing else help i j (compose (single d1 d2) s)
-  help2 _ _ _                   _ = Nothing --Wegen -Wall wird aber nie genutzt
+  help2 _ _ _                   _ = Nothing --Wegen -Wall
 
 prop_Equals :: Term -> Bool
 prop_Equals t = isNothing (ds t t)
