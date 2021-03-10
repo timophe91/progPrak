@@ -5,7 +5,6 @@ import Type
 import Test.QuickCheck
 import Substitution
 import Data.Maybe
-import Variables
 
 {- Calculates the disagreement set of two Terms. Returns Nothing if the disagreement set is empty
 -}

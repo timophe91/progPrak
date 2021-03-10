@@ -3,7 +3,7 @@ module Interactive where
 import Control.Monad
 import Parser
 import Type
-import SLD
+import SLD2
 import Pretty
 import Substitution
 
@@ -75,9 +75,21 @@ interactive = do
 printSolutions :: [Subst] -> IO ()
 printSolutions s = case s of 
                    []     -> putStrLn "No more Solutions found."
-                   (s':rs) -> do putStrLn (pretty s') -- pretty output the substitution
-                                 c <- getChar        -- get next action
-                                 when (c == ';') $ printSolutions rs -- as long as ';' is used, continue 
+                   (s':rs) -> do putStr (pretty s') -- pretty output the substitution
+                                 c <- getSingleChar        -- get next action
+                                 case c of
+                                   ';' -> printSolutions rs -- as long as ';' is used, continue 
+                                   '.' -> putStrLn "\nDone."
+                                   _   -> do putStrLn "\nInvalid Input."
+                                             printSolutions (s':rs)
+
+getSingleChar :: IO Char
+getSingleChar = do
+  line <- getLine
+  case line of
+    [] -> getSingleChar
+    (c:_) -> return c
+
 -- just the help message
 helpWaggon :: String 
 helpWaggon = unlines 
