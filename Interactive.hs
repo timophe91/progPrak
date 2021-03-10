@@ -1,6 +1,6 @@
 module Interactive where
 
-import Control.Monad
+
 import Parser
 import Type
 import SLD2
