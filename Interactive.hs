@@ -1,15 +1,13 @@
 module Interactive where
 
 import Control.Monad
-import Data.Char
 import Parser
-import Data.Either
 import Type
 import SLD
 import Pretty
 import Substitution
 
--- Interactive REPL for a simple Prolog
+-- Interactive ERPL for a simple Prolog
 interactive :: IO()
 interactive = do
   putStrLn welcomeWaggon
@@ -21,22 +19,22 @@ interactive = do
         readCommand  strat filePath eProg = do putStr "?- "
                                                c <- getLine -- read from console
                                                eval strat c filePath eProg
+
         eval :: Strategy -> String -> String -> Either String Prog -> IO()
         -- call the help Waggon
         eval strat' ":h"   filePath' eProg' = do putStrLn helpWaggon
                                                  readCommand strat' filePath' eProg' -- loop
         -- reload prog
-        eval strat' ":r"   filePath' eProg' = do loadedFile <- parseFile filePath'
+        eval strat' ":r"   filePath' _      = do loadedFile <- parseFile filePath'
                                                  case loadedFile of
                                                    Left  errStr''' -> do putStrLn errStr''' -- error but keep Path and failed Prog
                                                                          readCommand strat' filePath' (Left  errStr''') -- loop with new error
                                                    Right eProg'''  -> do putStrLn "Reloaded."
                                                                          readCommand strat' filePath' (Right eProg''') -- loop with reloaded prog
-        
         -- end program
         eval _      ":q"   _         _      = putStrLn quitWaggon -- quit
-        -- evaluate user input
-        eval strat' s      filePath' eProg' = let (action:userInput) = words s -- split words by space or newline
+        -- evaluate user input (s:rs) to prevent empty input
+        eval strat' (s:rs) filePath' eProg' = let (action:userInput) = words (s:rs) -- split words by space or newline
                                               in case length userInput of 
                                                    0 ->  let evalGoal = parse action -- the is only one command, and its the goal
                                                          in case evalGoal of -- check Goal for error
@@ -48,6 +46,7 @@ interactive = do
                                                                                                     putStrLn errStr'
                                                                                                     readCommand strat' filePath' eProg' -- loop
                                                                                 Right rdProg  -> do printSolutions (solveWith rdProg rdGoal strat')
+                                                                                                    readCommand strat' filePath' eProg' -- loop
                                                    1 -> case action of
                                                           -- load a file
                                                           ":l" -> do loadedFile <- parseFile (head userInput)
@@ -69,15 +68,16 @@ interactive = do
                                                   -- wrong number of commands and input
                                                    _    -> do putStrLn "Command not found. \nType ':h' for help."
                                                               readCommand strat' filePath' eProg' -- loop
-
+        -- empty input
+        eval strat' _      filePath' eProg' = do putStrLn "Command not found. \nType ':h' for help."
+                                                 readCommand strat' filePath' eProg' -- loop                       
 -- Pretty Printing the Solutions
 printSolutions :: [Subst] -> IO ()
 printSolutions s = case s of 
                    []     -> putStrLn "No more Solutions found."
-                   (s:rs) -> do 
-                              putStrLn (pretty s) -- pretty output the substitution
-                              c <- getChar        -- get next action
-                              when (c == ';') $ printSolutions rs -- as long as ';' is used, continue 
+                   (s':rs) -> do putStrLn (pretty s') -- pretty output the substitution
+                                 c <- getChar        -- get next action
+                                 when (c == ';') $ printSolutions rs -- as long as ';' is used, continue 
 -- just the help message
 helpWaggon :: String 
 helpWaggon = unlines 
