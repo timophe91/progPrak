@@ -13,7 +13,7 @@ import Pretty
 -}
 newtype Subst
   = Subs [(VarName, Term)]
-  deriving (Eq, Show)
+  deriving (Show)
 
 {- Instance for allVars from Vars
  - get all Variables from the Subs, also those from the Term

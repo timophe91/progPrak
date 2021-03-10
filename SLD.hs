@@ -4,7 +4,7 @@ import Substitution
 import Type
 
 newtype Edge = Edge Subst
-  deriving (Show, Eq)
+  deriving (Show)
 
 data SLDTree = Node Goal Edge [SLDTree]
   deriving (Show)
