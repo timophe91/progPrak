@@ -35,8 +35,8 @@ interactive = do
                                                                          readCommand strat' filePath' (Right eProg''') -- loop with reloaded prog
         -- end program
         eval _      ":q"   _         _      = putStrLn quitWaggon -- quit
-        -- evaluate user input
-        eval strat' s      filePath' eProg' = let (action:userInput) = words s -- split words by space or newline
+        -- evaluate user input (s:rs) to prevent empty input
+        eval strat' (s:rs) filePath' eProg' = let (action:userInput) = words (s:rs) -- split words by space or newline
                                               in case length userInput of 
                                                    0 ->  let evalGoal = parse action -- the is only one command, and its the goal
                                                          in case evalGoal of -- check Goal for error
@@ -48,6 +48,7 @@ interactive = do
                                                                                                     putStrLn errStr'
                                                                                                     readCommand strat' filePath' eProg' -- loop
                                                                                 Right rdProg  -> do printSolutions (solveWith rdProg rdGoal strat')
+                                                                                                    readCommand strat' filePath' eProg' -- loop
                                                    1 -> case action of
                                                           -- load a file
                                                           ":l" -> do loadedFile <- parseFile (head userInput)
@@ -69,7 +70,9 @@ interactive = do
                                                   -- wrong number of commands and input
                                                    _    -> do putStrLn "Command not found. \nType ':h' for help."
                                                               readCommand strat' filePath' eProg' -- loop
-
+        -- empty input
+        eval strat' _      filePath' eProg' = do putStrLn "Command not found. \nType ':h' for help."
+                                                 readCommand strat' filePath' eProg' -- loop                       
 -- Pretty Printing the Solutions
 printSolutions :: [Subst] -> IO ()
 printSolutions s = case s of 
