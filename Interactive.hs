@@ -9,7 +9,7 @@ import SLD
 import Pretty
 import Substitution
 
--- Interactive REPL for a simple Prolog
+-- Interactive ERPL for a simple Prolog
 interactive :: IO()
 interactive = do
   putStrLn welcomeWaggon
@@ -21,6 +21,7 @@ interactive = do
         readCommand  strat filePath eProg = do putStr "?- "
                                                c <- getLine -- read from console
                                                eval strat c filePath eProg
+
         eval :: Strategy -> String -> String -> Either String Prog -> IO()
         -- call the help Waggon
         eval strat' ":h"   filePath' eProg' = do putStrLn helpWaggon
@@ -32,7 +33,6 @@ interactive = do
                                                                          readCommand strat' filePath' (Left  errStr''') -- loop with new error
                                                    Right eProg'''  -> do putStrLn "Reloaded."
                                                                          readCommand strat' filePath' (Right eProg''') -- loop with reloaded prog
-        
         -- end program
         eval _      ":q"   _         _      = putStrLn quitWaggon -- quit
         -- evaluate user input
