@@ -72,5 +72,3 @@ bfs t = map (\(Just (s, Goal [])) -> s) (filter isSuccess (concat $ levels t))
 
 solveWith :: Prog -> Goal -> Strategy -> [Subst]
 solveWith p g st = st (sld p g)
-
-

@@ -2,7 +2,7 @@ module Interactive where
 
 import Parser
 import Type
-import SLD2
+import SLD
 import Pretty
 import Substitution
 

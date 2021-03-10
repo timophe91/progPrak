@@ -27,9 +27,21 @@ solveWith :: Prog -> Goal -> Strategy -> [Subst]
 solveWith p g s = []
 
 sld :: Prog -> Goal -> SLDTree
-sld (Prog (x:xs)) g = let p1 = Prog [rename (allVars g) p| p <- x:xs] in Node g (newTree p1 g p1)
+sld p g = let p1 = renameProg p (allVars g)  in Node g (newTree p1 g p1 (allVars g))
   where
-  newTree :: Prog -> Goal -> Prog ->[(Subst, SLDTree)]
-  newTree (Prog [])               _             _ = []
-  newTree (Prog (Rule xt []:xs))  (Goal (y:ys)) p = let s = unify xt y in if isJust s then let g1 = Goal [apply (fromJust s) z | z <- y:ys] in (fromJust s, Node (Goal [apply (fromJust s) xt]) []) : newTree (Prog xs) (Goal (y:ys)) p else newTree (Prog xs) (Goal (y:ys)) p
-  newTree (Prog (Rule xt xts:xs)) (Goal (y:ys)) p = let s = unify xt y in if isJust s then let g1 = Goal [apply (fromJust s) z | z <- y:ys] in (fromJust s, Node (Goal (map (apply (fromJust s)) xts)) (newTree (Prog xs) g1 p)) : newTree (Prog xs) (Goal (y:ys)) p else newTree (Prog xs) (Goal (y:ys)) p
+  newTree :: Prog -> Goal -> Prog -> [VarName] -> [(Subst, SLDTree)]
+  newTree (Prog [])               _             _ _ = []
+  newTree (Prog (Rule xt []:xs))  (Goal (y:ys)) p v = let s = unify xt y
+                                                          n = newTree (Prog xs) (Goal (y:ys)) p v
+                                                      in if isJust s
+                                                         then (fromJust s, Node (Goal []) []) : n
+                                                         else n
+  newTree (Prog (Rule xt xts:xs)) (Goal (y:ys)) p v = let s = unify xt y
+                                                          n = newTree (Prog xs) (Goal (y:ys)) p v
+                                                      in if isJust s
+                                                         then let g1 = Goal (map (apply (fromJust s)) xts)
+                                                              in (fromJust s, Node g1 (newTree (renameProg p v) g1 p (v ++ allVars p))) : n
+                                                         else n
+
+renameProg :: Prog -> [VarName] -> Prog
+renameProg (Prog x) y = Prog [rename y z | z <- x]
