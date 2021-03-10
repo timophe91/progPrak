@@ -9,12 +9,14 @@ import SLD
 import Pretty
 import Substitution
 
+-- Interactive REPL for a simple Prolog
 interactive :: IO()
 interactive = do
     putStrLn welcomeWaggon
     looping "" (Prog []) dfs -- loop  it
     putStrLn quitWaggon
 
+-- 
 looping :: String -> Prog -> Strategy -> IO()
 looping s p strat = do
     x <- readFromUser -- read user input
