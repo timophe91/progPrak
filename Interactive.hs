@@ -1,9 +1,7 @@
 module Interactive where
 
 import Control.Monad
-import Data.Char
 import Parser
-import Data.Either
 import Type
 import SLD
 import Pretty
@@ -27,7 +25,7 @@ interactive = do
         eval strat' ":h"   filePath' eProg' = do putStrLn helpWaggon
                                                  readCommand strat' filePath' eProg' -- loop
         -- reload prog
-        eval strat' ":r"   filePath' eProg' = do loadedFile <- parseFile filePath'
+        eval strat' ":r"   filePath' _      = do loadedFile <- parseFile filePath'
                                                  case loadedFile of
                                                    Left  errStr''' -> do putStrLn errStr''' -- error but keep Path and failed Prog
                                                                          readCommand strat' filePath' (Left  errStr''') -- loop with new error
@@ -77,10 +75,9 @@ interactive = do
 printSolutions :: [Subst] -> IO ()
 printSolutions s = case s of 
                    []     -> putStrLn "No more Solutions found."
-                   (s:rs) -> do 
-                              putStrLn (pretty s) -- pretty output the substitution
-                              c <- getChar        -- get next action
-                              when (c == ';') $ printSolutions rs -- as long as ';' is used, continue 
+                   (s':rs) -> do putStrLn (pretty s') -- pretty output the substitution
+                                 c <- getChar        -- get next action
+                                 when (c == ';') $ printSolutions rs -- as long as ';' is used, continue 
 -- just the help message
 helpWaggon :: String 
 helpWaggon = unlines 
