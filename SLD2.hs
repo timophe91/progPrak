@@ -11,13 +11,14 @@ data SLDTree = Node (Maybe (Subst, Goal)) [SLDTree]
 sld :: Prog -> Goal -> SLDTree
 sld _         (Goal []) = Node (Just (empty, Goal [])) []
 sld (Prog []) _         = Node Nothing []
-sld p         goal      = sldRec (allVars p ++ allVars goal) p goal empty (allVars goal)
+sld p         g         = sldRec (allVars p ++ allVars g) p g empty (allVars g)
 
     where
+        -- (All VarNames from Program and Goal), Prog, Goal, VarNames from Goal
         sldRec :: [VarName] -> Prog -> Goal -> Subst -> [VarName] -> SLDTree
-        sldRec _ _ (Goal []) fSubs fVar = Node (Just (restrictTo fSubs fVar, Goal [])) []
+        sldRec _ _ (Goal []) fSubs fVar = Node (Just (restrictTo fSubs fVar, Goal [])) [] -- no more literals left, restrict to original varnames
         sldRec used (Prog pr) g s fVar  = 
-            let renamedP = renameProg pr used                                                          -- renames program
+            let renamedP = renameProg pr used                                                               -- renames program
                 newUsed = used ++ concatMap allVars renamedP                                                -- updates used variables
             in Node (Just (s, g)) (map (\x -> case applyRule g x of                                         -- applies rules to goal
                 Nothing           -> Node Nothing []                                                        -- failure
@@ -26,13 +27,14 @@ sld p         goal      = sldRec (allVars p ++ allVars goal) p goal empty (allVa
         -- Applies rule to a goal if a substitution exists.
         applyRule :: Goal -> Rule -> Maybe (Subst, Goal)
         applyRule (Goal (go:al)) (Rule r rs) = 
-            case unify r go of 
-                Nothing  -> Nothing
+            case unify r go of --
+                Nothing  -> Nothing -- not possible
                 Just mgu -> Just (mgu, Goal (map (apply mgu) rs ++ map (apply mgu) al))
         applyRule _ _     = Nothing
 
 type Strategy = SLDTree -> [Subst]
 
+-- rename Program Variables, no double
 renameProg :: [Rule] -> [VarName]-> [Rule]
 renameProg []     _ = []
 renameProg (r:rs) v = let rR = rename v r
