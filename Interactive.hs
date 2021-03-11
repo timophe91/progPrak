@@ -7,8 +7,8 @@ import Pretty
 import Substitution
 
 -- Interactive ERPL for a simple Prolog
-interactive :: IO()
-interactive = do
+start :: IO()
+start = do
   putStrLn welcomeWaggon
   readCommand dfs "" (Left "Program started, no File Loaded.")
 
