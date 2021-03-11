@@ -57,6 +57,9 @@ prop_sameLengthNoAnonymousVar xs r = VarName "_" `notElem` allVars r ==> length 
 prop_biggerLengthWithAnonymousVar :: [VarName] -> Rule -> Bool 
 prop_biggerLengthWithAnonymousVar xs r =  length (allVars (rename xs r)) >= length (allVars r)
 
+-- renaming a rule twice, with all vars forbidden should be null
+prop_renameDouble :: [VarName] -> Rule  -> Bool 
+prop_renameDouble v r1 = let vrR1 = allVars (rename v r1)  in null (allVars(rename vrR1 r1) `intersect` vrR1)
 
 
 {- Test all props_
