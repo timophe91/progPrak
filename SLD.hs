@@ -28,7 +28,7 @@ dfs = dfss empty []
   where
   dfss :: Subst -> [Subst] -> SLDTree -> [Subst]
   dfss s lst (Node (Goal []) [])   = s : lst
-  dfss _ _ (Node _ [])           = [] -- Fail
+  dfss _ _   (Node _ [])           = [] -- Fail
   dfss s lst (Node _ t)            = dfsList s lst t
   
   dfsList :: Subst -> [Subst] -> [(Subst, SLDTree)] -> [Subst]
@@ -37,10 +37,18 @@ dfs = dfss empty []
 
 
 bfs :: Strategy
-bfs = bfss
+bfs t = bfs' [(empty, t)] [(empty, t)]
   where
-  bfss :: SLDTree -> [Subst]
-  bfss s = []
+  bfs' :: [(Subst, SLDTree)] -> [(Subst, SLDTree)] -> [Subst]
+  bfs' []                        [] = []
+  bfs' []                        x  = let y = level x in bfs' y y
+  bfs' ((s,Node (Goal []) []):r) x  = s : bfs' r x
+  bfs' (x:xs)                    y  = bfs' xs y
+  level :: [(Subst, SLDTree)] -> [(Subst, SLDTree)]
+  level x = concatMap level' x
+  level' :: (Subst, SLDTree) -> [(Subst, SLDTree)]
+  level' (s, Node g x) = map (\(y,z) -> (compose y s, z)) x
+  
 
 solveWith :: Prog -> Goal -> Strategy -> [Subst]
 solveWith p g st = map (\x -> restrictTo x (allVars g)) (st (sld p g))
