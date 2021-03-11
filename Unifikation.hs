@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Unifikation where
+module Unifikation (ds, unify, testAllUnifikation)where
 
 import Type
 import Test.QuickCheck
