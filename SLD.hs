@@ -17,7 +17,7 @@ sld :: Prog -> Goal -> SLDTree
 sld p g = sld' g []
   where
   sld' :: Goal -> [VarName] -> SLDTree
-  sld' (Goal [])     _ = Node (Goal []) []                             --If the goal is empty the node is empty
+  sld' (Goal [])     _ = Node (Goal []) []                             --If the goal is empty, we r done and the node is empty
   sld' (Goal (t:ts)) v = Node (Goal (t:ts))                            --Create a new node with the current goal
     [(mgu, sld' (Goal (map (apply mgu) (ts ++ r))) (allVars mgu ++ v)) --Apply the usable rules and call sld' on the new goal
     | (Rule l r) <- renameProg p (allVars (Goal (t:ts)) ++ v)          --Rename of all rules
@@ -31,14 +31,14 @@ sld p g = sld' g []
 dfs :: Strategy
 dfs = dfss empty []
   where
-  dfss :: Subst -> [Subst] -> SLDTree -> [Subst]
-  dfss s lst (Node (Goal []) [])   = s : lst
-  dfss _ _   (Node _ [])           = [] -- Fail
-  dfss s lst (Node _ t)            = dfsList s lst t
+  dfss :: Subst -> [Subst] -> SLDTree -> [Subst]      
+  dfss s lst (Node (Goal []) [])   = s : lst  -- Goal and List of tuple is empty, found a solution
+  dfss _ _   (Node _ [])           = []       -- Fail, there is e goal, but no more way
+  dfss s lst (Node _ t)            = dfsList s lst t -- go throug the list if there is more way
   
   dfsList :: Subst -> [Subst] -> [(Subst, SLDTree)] -> [Subst]
-  dfsList _  _    []         = []
-  dfsList s' lst' ((x,y):rt) = dfss (compose x s') lst' y ++ dfsList s' lst' rt
+  dfsList _  _    []         = [] -- we r done
+  dfsList s' lst' ((x,y):rt) = dfss (compose x s') lst' y ++ dfsList s' lst' rt -- take first tuple and concat the rest later
 
 {- Surches the sld tree für solutions using Breadth-first search
 -}
