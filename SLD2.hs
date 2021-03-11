@@ -18,7 +18,7 @@ sld p         g         = sldRec (allVars p ++ allVars g) p g empty (allVars g)
         sldRec :: [VarName] -> Prog -> Goal -> Subst -> [VarName] -> SLDTree
         sldRec _ _ (Goal []) fSubs fVar = Node (Just (restrictTo fSubs fVar, Goal [])) [] -- no more literals left, restrict to original varnames
         sldRec used (Prog pr) g s fVar  = 
-            let renamedP = renameProg pr used                                                               -- renames program
+            let renamedP = map (rename used) pr                                                               -- renames program
                 newUsed = used ++ concatMap allVars renamedP                                                -- updates used variables
             in Node (Just (s, g)) (map (\x -> case applyRule g x of                                         -- applies rules to goal
                 Nothing           -> Node Nothing []                                                        -- failure
@@ -28,7 +28,7 @@ sld p         g         = sldRec (allVars p ++ allVars g) p g empty (allVars g)
         applyRule :: Goal -> Rule -> Maybe (Subst, Goal)
         applyRule (Goal (go:al)) (Rule r rs) = 
             case unify r go of --
-                Nothing  -> Nothing -- not possible
+                Nothing  -> Nothing
                 Just mgu -> Just (mgu, Goal (map (apply mgu) rs ++ map (apply mgu) al))
         applyRule _ _     = Nothing
 
