@@ -29,11 +29,11 @@ renameVars v vR (Rule t ts)  = let var              = freshVars \\ (v ++ vR) -- 
 
 -- renaming the anonymous vars
 renameAnonymousVars :: [Term] -> [VarName] -> ([VarName], [Term])
-renameAnonymousVars []                     n = (n, []) -- all done
-renameAnonymousVars ((Var (VarName v)):ts) n = let (n', tns) = renameAnonymousVars ts n -- rename the last variables first, pass trough the VarName List
-                                               in  if v == "renameMe_" then (tail n', Var (head n') : tns) else (n', Var (VarName v) : tns) -- if the VarName has to be renamed use the head and pass the tail
-renameAnonymousVars ((Comb cN cTs):ts)     n = let (n', ncT)   = renameAnonymousVars cTs n -- rename the [Term] of the Comb
-                                                   (n'', nts)  = renameAnonymousVars ts n' -- rename the rest List
+renameAnonymousVars []                     n = (n, [])                                                                                       -- all done
+renameAnonymousVars ((Var (VarName v)):ts) n = let (n', tns) = renameAnonymousVars ts n                                                      -- rename the last variables first, pass trough the VarName List
+                                               in  if v == "renameMe_" then (tail n', Var (head n') : tns) else (n', Var (VarName v) : tns)  -- if the VarName has to be renamed use the head and pass the tail
+renameAnonymousVars ((Comb cN cTs):ts)     n = let (n', ncT)   = renameAnonymousVars cTs n  -- rename the [Term] of the Comb
+                                                   (n'', nts)  = renameAnonymousVars ts n'  -- rename the rest List
                                                in  (n'', Comb cN ncT:nts) 
  
 

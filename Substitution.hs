@@ -44,15 +44,15 @@ empty = Subs []
  - substitutions on self r empty
 -}
 single :: VarName -> Term -> Subst
-single v (Var v2) = if v == v2 then empty else Subs [(v, Var v2)] -- prevent figure on self
+single v (Var v2) = if v == v2 then empty else Subs [(v, Var v2)]  -- prevent figure on self
 single v t        = Subs [(v, t)]
 
 {- Applys a substitution to a given term
 -}
 apply :: Subst -> Term -> Term
 apply (Subs [])        t          = t
-apply (Subs ((x,y):s)) (Var v)    = if x == v then y else apply (Subs s) (Var v) -- replace Variable if found with first occurence
-apply s                (Comb n t) = Comb n [apply s x| x <- t] -- apply Subst on every Term in Comb
+apply (Subs ((x,y):s)) (Var v)    = if x == v then y else apply (Subs s) (Var v)  -- replace Variable if found with first occurence
+apply s                (Comb n t) = Comb n [apply s x| x <- t]                    -- apply Subst on every Term in Comb
 
 {- Merge two Prolog Substitutions
  - first removeAll duplicated VarNames from the Subst for CleanUp, if there r given Subst e.g. {A -> B, A -> C} => {A -> B}
@@ -69,7 +69,7 @@ removeDupsInSubs :: Subst -> Subst
 removeDupsInSubs (Subs [])         = empty
 removeDupsInSubs (Subs ((v, t):r)) = concatSubs (single v t) (removeDupsInSubs (Subs (removeOthers v r)))
   where 
-    removeOthers :: VarName -> [(VarName, Term)] -> [(VarName, Term)] -- remove every occurrence of v
+    removeOthers :: VarName -> [(VarName, Term)] -> [(VarName, Term)]                                       -- remove every occurrence of v
     removeOthers _ []          =  []
     removeOthers v0 ((v1, t1):r1) = if v0 == v1 then removeOthers v0 r1 else (v1, t1) : removeOthers v0 r1
 
@@ -97,9 +97,9 @@ restrictTo (Subs ((x,y):s)) n  = if x `elem` n then  compose (single x y) (restr
 -}
 instance Arbitrary Subst where
   arbitrary = do
-    x <- arbitrary -- List of VarNames
-    y <- arbitrary -- List of Terms
-    oneof [return (Subs []), return (Subs ([(v,t)| v <-  x, t <- y]))] -- returns ether the empty substitution or a random substitution created using the List of VarNames and Terms
+    x <- arbitrary                                                      -- List of VarNames
+    y <- arbitrary                                                      -- List of Terms
+    oneof [return (Subs []), return (Subs ([(v,t)| v <-  x, t <- y]))]  -- returns ether the empty substitution or a random substitution created using the List of VarNames and Terms
 
 {- 1. Empty applied to a term shouldn't change the term
 -}

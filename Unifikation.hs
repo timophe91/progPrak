@@ -34,17 +34,26 @@ unify x y = if x == y then Just empty else help x y empty -- terms r equal,
   help2 i j (Just (Var d1, d2)) s = if d1 `elem` allVars d2 then Nothing else help i j (compose (single d1 d2) s)
   help2 _ _ _                   _ = Nothing --Wegen -Wall
 
+
+{- The ds of a Term and itself should be nothing
+-}
 prop_Equals :: Term -> Bool
 prop_Equals t = isNothing (ds t t)
 
+{- If the ds of two Term is not nothing the Terms schould not be the same
+-}
 prop_dsNotEmpty :: Term -> Term -> Property 
 prop_dsNotEmpty t1 t2 = isJust (ds t1 t2) ==> t1 /= t2
 
+{- If the ds of two Term is nothing unify should return a value and the domain of that value should be null
+-}
 prop_dsEmpty :: Term -> Term -> Property
 prop_dsEmpty t1 t2 = isNothing (ds t1 t2) ==> let u = unify t1 t2 in isJust u && null (domain (fromJust u))
 
+{- If unify return a substitution for two Term the ds of the substitution applyed to both Term should be nothing
+-}
 prop_unify :: Term -> Term -> Property
-prop_unify t1 t2 = isJust (unify t1 t2) ==> let u = fromMaybe empty (unify t1 t2) in isNothing (ds (apply u t1) (apply u t2))
+prop_unify t1 t2 = isJust (unify t1 t2) ==> let u = fromJust (unify t1 t2) in isNothing (ds (apply u t1) (apply u t2))
 
 
 {- Test all props_
