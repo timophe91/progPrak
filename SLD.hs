@@ -36,12 +36,13 @@ sld p g = let p1 = renameProg p (allVars g)  in Node g (newTree p1 g p1 (allVars
                                                       in if isJust s
                                                          then (fromJust s, Node (Goal []) []) : n
                                                          else n
-  newTree (Prog (Rule xt xts:xs)) (Goal (y:ys)) p v = let s = unify xt y
-                                                          n = newTree (Prog xs) (Goal (y:ys)) p v
-                                                      in if isJust s
-                                                         then let g1 = Goal (map (apply (fromJust s)) xts)
-                                                              in (fromJust s, Node g1 (newTree (renameProg p v) g1 p (v ++ allVars p))) : n
-                                                         else n
+  newTree (Prog ((Rule xt xts):xs)) (Goal (y:ys)) p v = let s = unify xt y
+                                                            n = newTree (Prog xs) (Goal (y:ys)) p v
+                                                        in if isJust s
+                                                           then let g1 = Goal (map (apply (fromJust s)) xts)
+                                                                    v1 = v ++ allVars p
+                                                                in (fromJust s, Node g1 (newTree (renameProg p v1) g1 p v1)) : n
+                                                           else n
 
 renameProg :: Prog -> [VarName] -> Prog
 renameProg (Prog x) y = Prog [rename y z | z <- x]
