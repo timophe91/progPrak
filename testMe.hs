@@ -11,8 +11,7 @@ main = do _ <-testAllModules
 
 -- test all modules with tests
 testAllModules :: IO ()
-testAllModules = do _ <-testAllUnifikation
-                    _ <-testAllSubstitution
-                    _ <- testAllRename
-                    putStrLn "Done"
-                     
+testAllModules = do a <- testAllUnifikation
+                    b <-testAllSubstitution
+                    c <- testAllRename
+                    if a && b && c then putStrLn "Done" else putStrLn "Fail."
