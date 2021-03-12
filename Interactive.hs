@@ -81,11 +81,13 @@ printSolutions s = case s of
                                    _   -> do putStrLn "\nInvalid Input."
                                              printSolutions (s':rs)
 
+{- To avoid problems with getChar
+-}
 getSingleChar :: IO Char
 getSingleChar = do
   line <- getLine
   case line of
-    [] -> getSingleChar
+    []    -> getSingleChar
     (c:_) -> return c
 
 -- just the help message
@@ -109,6 +111,7 @@ welcomeWaggon = unlines
   [ "##################################"
    ,"Welcome to our very simpel Prolog"
    ,"Type \":h\" for help."
+   ,"Default strat: dfs"
    ,"##################################"
   ]
 

@@ -33,7 +33,7 @@ dfs = dfss empty []
   where
   dfss :: Subst -> [Subst] -> SLDTree -> [Subst]      
   dfss s lst (Node (Goal []) [])   = s : lst  -- Goal and List of tuple is empty, found a solution
-  dfss _ _   (Node _ [])           = []       -- Fail, there is e goal, but no more way
+  dfss _ _   (Node _ [])           = []       -- Fail, there is a goal, but no more way
   dfss s lst (Node _ t)            = dfsList s lst t -- go throug the list if there is more way
   
   dfsList :: Subst -> [Subst] -> [(Subst, SLDTree)] -> [Subst]

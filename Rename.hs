@@ -12,7 +12,7 @@ import Test.QuickCheck
  - tagging anonymous Vars _ with renameMe_ and renaming them with another endless set of fresh var
 -}
 rename :: [VarName] -> Rule -> Rule
-rename v  r = renameVars v  (allVars r) r
+rename v  r = renameVars v (allVars r) r
 
 -- renaming Variables with forbidden Vars and the set of Var from Rule
 renameVars :: [VarName] -> [VarName]-> Rule -> Rule
@@ -35,7 +35,7 @@ renameAnonymousVars ((Var (VarName v)):ts) n = let (n', tns) = renameAnonymousVa
 renameAnonymousVars ((Comb cN cTs):ts)     n = let (n', ncT)   = renameAnonymousVars cTs n  -- rename the [Term] of the Comb
                                                    (n'', nts)  = renameAnonymousVars ts n'  -- rename the rest List
                                                in  (n'', Comb cN ncT:nts) 
- 
+
 
 -- all variables forbidden and those of the old rule intersected with the variables of the renamed rule should be null  
 prop_allVarsDiffEmpty :: [VarName] -> Rule -> Bool
