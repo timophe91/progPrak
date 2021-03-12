@@ -52,6 +52,8 @@ concatmaplist(P, Xs, Ys) :- maplist(P, Xs, Yss), concatlist(Yss, Ys).
 
 % Test query: "last(Xs,3).".
 % Expected result: Infinite solutions, lists with 3 as a last element.
+% Note that all elements except for the last one have to be different(!) free
+% variables.
 
 % Test query: "reverse([1,2,3],Xs).".
 % Expected result: One solution, "{Xs -> [3, 2, 1]}".
@@ -73,15 +75,12 @@ concatmaplist(P, Xs, Ys) :- maplist(P, Xs, Yss), concatlist(Yss, Ys).
 % "{X -> 2, Y -> [1, L]}", and "{X -> L, Y -> [1, 2]}".
 % Tests renaming during SLD resolution.
 
-% Test query: "sort([3,1,2],Xs).".
-% Expected result: One solution, "{Xs -> [1, 2, 3]}".
-
 % Test query: "append(X,Y,X).".
 % Expected result: Infinite solutions, where Y is the empty list.
 % Tests strategies and REPL for infinite number of solutions.
 
 % Test query: "lengthP(Xs,s(s(o))).".
-% Expected result: One solution, "{Xs -> [_, _]}".
+% Expected result: One solution, "{Xs -> [A, B]}".
 
 % Test query: "concatlist([[1,2,3],[4]],Xs).".
 % Expected result: One solution, "{Xs -> [1, 2, 3, 4]}".
@@ -93,8 +92,12 @@ concatmaplist(P, Xs, Ys) :- maplist(P, Xs, Yss), concatlist(Yss, Ys).
 % to be part of every solution nonetheless).
 % Tests multiple literals in a query and solution printing.
 
+% Test query: "sort([3,1,2],Xs).".
+% Expected result: One solution, "{Xs -> [1, 2, 3]}".
+% BONUS: Arithmetics
+
 % Test query: "length(Xs,2).".
-% Expected result: One solution, "{Xs -> [_, _]}", but non-termination.
+% Expected result: One solution, "{Xs -> [A, B]}", but non-termination.
 % BONUS: Arithmetics
 
 % Test query: "maplist(last,[[1,2,3,4],[_,2]],Xs).".

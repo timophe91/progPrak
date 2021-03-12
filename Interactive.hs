@@ -5,6 +5,7 @@ import Type
 import SLD
 import Pretty
 import Substitution
+import System.IO
 
 -- Interactive ERPL for a simple Prolog
 start :: IO()
@@ -16,6 +17,7 @@ start = do
         -- Read a command and pipe it to eval
         readCommand :: Strategy -> String ->  Either String Prog -> IO()
         readCommand  strat filePath eProg = do putStr "?- "
+                                               hFlush stdout
                                                c <- getLine -- read from console
                                                eval strat c filePath eProg
 
